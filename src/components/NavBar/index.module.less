@@ -1,0 +1,107 @@
+.navBar {
+  position: relative;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 99;
+  background: #fff;
+  flex: 0 0 auto;
+
+  &.isFixed {
+    position: fixed;
+  }
+}
+
+.title {
+  padding: 0 5px;
+  height: 100%;
+  width: 0;
+  flex: 1 1 auto;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .titleText {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    padding: 16px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.titleMain {
+      font-style: normal;
+      font-size: 20px;
+      line-height: 24px;
+      letter-spacing: 0.4px;
+    }
+  }
+}
+
+.btnWrapper {
+  display: flex;
+  height: 100%;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnCircle {
+  .btn();
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+}
+
+.btnGroup {
+  height: 32px;
+  border-radius: 16px;
+  padding: 0 7px;
+  box-shadow: 0 0 0.5px 0 #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  overflow: hidden;
+
+  .btn {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.btnSp {
+  height: 20px;
+  opacity: 0.2;
+  width: 1px;
+  overflow: hidden;
+  background: #000;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.isMain {
+    .title {
+      font-weight: 600;
+      font-size: 28px;
+      padding-left: 0;
+      justify-content: left;
+    }
+  }
+}

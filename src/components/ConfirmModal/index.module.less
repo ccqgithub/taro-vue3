@@ -1,0 +1,97 @@
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes moveIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  width: 295px;
+  background: #fff;
+  border-radius: 8px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1001;
+  transform: translate(-50%, -50%);
+
+  &:global(.move-enter-active) {
+    animation: moveIn 0.3s ease forwards;
+  }
+  &:global(.move-leave-active) {
+    animation: moveIn 0.3s ease reverse forwards;
+  }
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.4);
+
+  &:global(.fade-enter-active) {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  &:global(.fade-leave-active) {
+    animation: fadeIn 0.3s ease-in reverse forwards;
+  }
+}
+
+.title {
+  padding: 20px;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.content {
+  padding: 20px;
+  text-align: center;
+}
+
+.btns {
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: stretch;
+
+  .btn {
+    flex: 1 1 0;
+    line-height: 50px;
+    text-align: center;
+    height: 50px;
+
+    &:nth-child(2) {
+      border-left: 1px solid #ddd;
+    }
+  }
+}
+
+.ok {
+  color: rgb(23, 131, 194);
+
+  &.isDisabled {
+    color: #ccc;
+  }
+}
+
+.cancel {
+  color: #555;
+
+  &.isDisabled {
+    color: #ccc;
+  }
+}
