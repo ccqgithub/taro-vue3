@@ -1,0 +1,21 @@
+{
+  "miniprogramRoot": "./dist",
+  "projectname": "taro-vue3",
+  "description": "",
+  "appid": "fjksjf",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram",
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "assets/static"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+.toast {
+  min-width: 50px;
+  overflow: hidden;
+  z-index: 99999;
+  opacity: 1;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+
+  &:global(.fade-enter-active) {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  &:global(.fade-leave-active) {
+    animation: fadeIn 0.3s ease-in reverse forwards;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.content {
+  min-width: 50px;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.title {
+  color: #fff;
+}

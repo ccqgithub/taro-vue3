@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": "./",
+    "outDir": "lib",
+    "typeRoots": [
+      "node_modules/@types",
+      "global.d.ts"
+    ],
+    "paths": {
+      "@/*": ["src/*"],
+      "~@/*": ["src/*"]
+    },
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "types": ["node", "miniprogram-api-typings"],
+    "isolatedModules": true
+  },
+  "include": [
+    "*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.vue",
+    "config/**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "compileOnSave": false
+}

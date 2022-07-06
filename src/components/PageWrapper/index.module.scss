@@ -1,0 +1,24 @@
+.pageMain {
+  height: 0;
+  flex: 1 1 auto;
+}
+
+.pageScroll {
+  height: 100%;
+}
+
+.tabBar {
+  position: relative;
+}
+
+.page {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  &.hasTab {
+    height: 100%;
+  }
+}

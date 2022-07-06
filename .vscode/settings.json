@@ -1,0 +1,11 @@
+{
+  "path-autocomplete.pathMappings": {
+    "@": "${folder}/src",
+    "~@": "${folder}/src"
+  },
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "stylelint.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
