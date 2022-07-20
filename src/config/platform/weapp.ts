@@ -1,30 +1,34 @@
-import Taro from '@tarojs/taro';
-import { StorageKeys, ApiEnv, WeappEnv } from '@/constants';
+import Taro, { getAccountInfoSync } from '@tarojs/taro';
+import { StorageKeys } from '@/constants';
+import { AppEnv, WeappEnv } from '@/types';
 import * as envs from '../env';
 import { GetConfigs } from '../type';
 
 // 小程序环境和 api 环境映射
-const envMap: Record<WeappEnv, ApiEnv> = {
-  develop: envs.isRelease ? 'staging' : 'test',
-  trial: envs.isRelease ? 'staging' : 'test',
+const envMap: Record<WeappEnv, AppEnv> = {
+  develop: 'dev',
+  trial: 'test',
   release: 'prod'
 };
 
 const getConfigs: GetConfigs = () => {
-  let env: ApiEnv = envMap[envs.weappEnv] || 'prod';
+  const weappEnv = getAccountInfoSync().miniProgram.envVersion;
+  let env: AppEnv = envMap[weappEnv] || 'prod';
+
   // 开启调试的状态
   const systemInfo = Taro.getSystemInfoSync();
   if (systemInfo.enableDebug) {
-    const storeEnv = Taro.getStorageSync(StorageKeys.API_ENV) as ApiEnv;
-    if (storeEnv && envs.apiEnvs[storeEnv]) {
+    const storeEnv = Taro.getStorageSync(StorageKeys.API_ENV) as AppEnv;
+    if (storeEnv && envs.appEnvs.includes(storeEnv)) {
       env = storeEnv;
     }
   }
 
   return {
     ...envs,
-    ...envs.apiEnvs[env],
-    apiEnv: env
+    apiBaseUrl: envs.apiBaseUrls[env],
+    h5BaseUrl: envs.h5BaseUrls[env],
+    extAssetsBaseUrl: envs.extAssetsBaseUrls[env]
   };
 };
 

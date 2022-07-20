@@ -7,9 +7,10 @@ import {
   ErrorType,
   normalizeError
 } from '@/utils';
-import { wechatLogin } from '@/service';
+import { loginByCode } from '@/service';
 import { getGlobalStore } from '@/store';
-import { IToken } from '@/constants';
+import { i18n } from '@/i18n';
+import { IToken } from '@/types';
 
 // 是否有 refresh token 逻辑
 const USE_REFRESH_TOKEN = true;
@@ -36,6 +37,7 @@ export type SuccessCallbackResult<T> = {
   statusCode: number;
   errMsg: string;
 };
+
 type OptionType = {
   url: string;
   data?: object | string;
@@ -60,7 +62,8 @@ const request = {
     }
 
     const globalStore = getGlobalStore()!;
-    const { language, loginToken } = globalStore;
+    const { loginToken } = globalStore;
+    const language = i18n.global.locale.value;
     const {
       url,
       data,
@@ -74,9 +77,7 @@ const request = {
     };
     // auth token
     if (loginToken && !noToken) {
-      headers[
-        'Authorization'
-      ] = `${loginToken.tokenType} ${loginToken.accessToken}`;
+      headers['Authorization'] = `Bearer ${loginToken.accessToken}`;
     }
     // 当接口参数 Object 对象中不包含 success/fail/complete 时将默认返回 promise，否则仍按回调方式执行，无返回值。
     const option: OptionType = {
@@ -106,11 +107,10 @@ const request = {
           return res.data;
         }
         // token刷新失败，登录
-        const loginRes = await wechatLogin().then((v) => {
-          if (!v.bindPhoneNumber) {
-            globalStore.setToken(v as IToken);
-            globalStore.setLoginInfo(v);
-            return v;
+        const loginRes = await loginByCode().then((v) => {
+          if (v) {
+            globalStore.setToken(v);
+            return globalStore.getUserInfo();
           }
           // refresh token 尝试失败，清除登录状态
           globalStore.clearLogin();

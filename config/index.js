@@ -1,14 +1,13 @@
 const path = require('path');
-const getEnvs = require('./utils/getEnvs');
+const loadEnvs = require('./utils/loadEnvs');
 const { createClassNamehash } = require('./utils/createClassNameHash');
 
 const root = process.cwd();
 const publicUrl = process.env.TARO_PUBLIC_URL || '/';
+const env = loadEnvs();
 
 const config = {
-  env: {
-    ...getEnvs()
-  },
+  env: { ...env },
   projectName: 'taro-vue3',
   date: '2022-4-20',
   designWidth: 375,

@@ -12,7 +12,7 @@ declare module '*.sass';
 declare module '*.styl';
 
 declare namespace NodeJS {
-  interface ProcessEnv {
+  interface ProcessEnv extends CustomProcessEnv {
     TARO_ENV:
       | 'weapp'
       | 'swan'
@@ -23,6 +23,7 @@ declare namespace NodeJS {
       | 'quickapp'
       | 'qq'
       | 'jd';
+    readonly TARO_AUTHING_APP_ID: string;
   }
 }
 

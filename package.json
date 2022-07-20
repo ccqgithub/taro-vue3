@@ -11,15 +11,16 @@
 	"scripts": {
 		"build:weapp-test": "cross-env TARO_RELEASE=false taro build --type miniprogram",
 		"build:weapp": "cross-env TARO_RELEASE=true taro build --type miniprogram",
+    "build:h5": "taro build --type h5",
 		"dev:weapp": "taro build --type miniprogram --watch",
-		"build:h5": "taro build --type h5",
-		"dev:h5": "cross-env TARO_H5_ENV=dev yarn run build:h5 -- --watch",
-		"style:dts": "node scripts/cssModulesDTS.js",
+		"dev:h5": "taro build --type h5 --watch",
 		"lint": "npm-run-all --parallel lint:*",
 		"lint:js": "eslint . --ext .js --ext .ts",
 		"lint:css": "stylelint '**/*.{css,less,scss}'",
 		"lint:ts": "vue-tsc --noEmit --skipLibCheck -p tsconfig.json",
-		"prepare": "husky install"
+		"style:dts": "node scripts/cssModulesDTS.js",
+    "env": "node scripts/envDts.js",
+    "prepare": "husky install"
 	},
 	"author": "",
 	"dependencies": {

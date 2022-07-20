@@ -55,6 +55,7 @@ npm run dev:weapp
   - `@/config`：配置
   - `@/constants`: 常量
       - `@/constants/langs`: 翻译文件
+  - `@/types`: 类型定义
   - `@/pages`: 页面
   - `@/root`: 直接copy到根目录
   - `@/service`: 业务逻辑，API调用
@@ -65,21 +66,23 @@ npm run dev:weapp
 
 ## 环境变量
 
-合并规则：
-
-```js
-{
-  ...`envs/.env`,
-  ...`envs/.${TARO_ENV_REAL}`,
-  ...`envs/.${TARO_ENV_REAL}.${TARO_H5_ENV}`,
-  ...`envs/.env.local`,
-  ...`process.env`,
-  ...`config/dev(dev) or config/prod(build)`
-}
-```
+> 执行`npm run env`会自动降`envs`目录下定义的环境变量名自动添加到`env.d.ts`文件中，从而支持`process.env.xx`类型提示。
 
 - `process.env.TARO_ENV_REAL`: 构建类型，微信小程序、h5 等。
-- `process.env.TARO_H5_ENV`: h5 构建的环境，比如 staging，test 等。
+- `process.env.TARO_APP_ENV`: 构建的环境，比如 staging，test 等。
+
+合并顺序：优先级从上到下
+
+`process.env`
+`.env.${taroEnv}.local`
+`.env.local`
+`.env.${taroEnv}.${nodeDev}`
+`.env.${taroEnv}`
+`.env`
+
+## CSS Modules
+
+执行`npm run styles:dts`，会监听`.module.scss`文件，自动生成`.module.scss.d.ts`，以支持 Typescript。
 
 ## 路径提示
 

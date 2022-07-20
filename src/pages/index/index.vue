@@ -83,7 +83,7 @@ const showConfirm = async () => {
     <NView :class="S.block">
       <NView :class="S.blockTit"> 导航 </NView>
       <NView>
-        <NView v-if="!appStore.loginInfo" @tap="toLogin">登录</NView>
+        <NView v-if="!appStore.isLogin" @tap="toLogin">登录</NView>
         <NView v-if="appStore.userInfo">
           登录用户{{ appStore.userInfo?.nickname }}
         </NView>

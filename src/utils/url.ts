@@ -9,7 +9,7 @@ export const joinUrl = (...paths: string[]) => {
 
 export const extImgUrl = (path: string) => {
   if (path.startsWith('http') || path.startsWith('data:')) return path;
-  const base = getConfig().extImgBaseUrl;
+  const base = getConfig().extAssetsBaseUrl;
   return joinUrl(base, path);
 };
 

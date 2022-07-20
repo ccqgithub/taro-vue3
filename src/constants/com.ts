@@ -1,7 +1,3 @@
-export type H5Env = 'dev' | 'test' | 'staging' | 'prod';
-export type ApiEnv = 'dev' | 'test' | 'staging' | 'prod';
-export type WeappEnv = 'develop' | 'trial' | 'release';
-
 export const PickerHeight = 610;
 
 export enum StorageKeys {

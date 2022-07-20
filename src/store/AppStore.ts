@@ -1,3 +1,4 @@
+import { getGlobalStore } from './globalStore';
 import { computed, markRaw, reactive, Ref, ref, toRefs } from 'vue';
 import queryString from 'query-string';
 import { defineStore } from 'pinia';
@@ -7,23 +8,15 @@ import { getConfig } from '@/config';
 import { getRoutePath, AppRoutes } from '@/app.config';
 import { GeneralError, normalizeError, randomKey } from '@/utils';
 import { ToastItem, ToastConfig, ConfirmModalProps } from '@/components';
-import {
-  IToken,
-  getDefaultLanguage,
-  LangType,
-  StorageKeys,
-  ApiEnv,
-  getSystemInfo,
-  getMenuButtonInfo
-} from '@/constants';
+import { StorageKeys, getSystemInfo, getMenuButtonInfo } from '@/constants';
 import {
   getUserInfo as apiGetUserInfo,
   LoginResp,
-  UserInfo,
-  wechatLogin
+  loginByCode,
+  loginByPhone
 } from '@/service';
-import { eventBus, EventKeys } from './eventBus';
-import { LocationStore } from './LocationStore';
+import { User, AppEnv, IToken } from '@/types';
+import { LocationStore, eventBus, EventKeys } from '@/store';
 
 type ConfirmProps = Omit<ConfirmModalProps, 'visible'>;
 
@@ -55,17 +48,10 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
   return defineStore(useStoreId('app'), () => {
     // states
     const state = reactive({
-      // 系统信息
-      systemInfo,
-      // 胶囊信息
-      menuButtonInfo,
       // 登录用户
       loginToken: token,
-      loginInfo: null,
       // 用户信息
       userInfo: null,
-      // 语言
-      language: getDefaultLanguage(),
       // 是否前台
       isShow: false,
       isInited: false,
@@ -76,12 +62,8 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       // confirm modals
       confirmModals: new Map()
     }) as {
-      systemInfo: Taro.getSystemInfoSync.Result;
-      menuButtonInfo: Taro.getMenuButtonBoundingClientRect.Rect;
       loginToken: IToken | null;
-      loginInfo: LoginResp | null;
-      userInfo: UserInfo | null;
-      language: LangType;
+      userInfo: User | null;
       isShow: boolean;
       isInited: boolean;
       errors: GeneralError[];
@@ -101,7 +83,7 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     };
     // getters
     const dataInited = computed(() => {
-      return true;
+      return state.isInited;
     });
     const isLogin = computed(() => {
       if (!state.isInited) return false;
@@ -112,10 +94,10 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       state.isShow = v;
     };
     // login status
-    const setUserInfo = (v: Partial<UserInfo>) => {
+    const setUserInfo = (v: Partial<User>) => {
       state.userInfo = state.userInfo
         ? { ...state.userInfo, ...v }
-        : (v as UserInfo);
+        : (v as User);
     };
     const getUserInfo = async () => {
       try {
@@ -134,12 +116,8 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
         Taro.removeStorageSync(StorageKeys.LOGIN_TOKEN);
       }
     };
-    const setLoginInfo = (info: LoginResp | null) => {
-      state.loginInfo = info;
-    };
     const clearLogin = () => {
       setToken(null);
-      state.loginInfo = null;
       state.userInfo = null;
     };
     const clearLoginAndReLaunch = () => {
@@ -147,9 +125,6 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       Taro.reLaunch({
         url: '/pages/index/index'
       });
-    };
-    const setLanguage = (lang: LangType) => {
-      state.language = lang;
     };
     // init
     const init = async () => {
@@ -166,13 +141,13 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     // login
     const login = async () => {
       // 静默登录
-      await wechatLogin();
-      // if (!res.bindPhoneNumber) {
-      //   setToken(res);
-      //   setLoginInfo(res);
-      // } else {
-      //   clearLogin();
-      // }
+      const res = await loginByCode();
+      if (res) {
+        setToken(res);
+        await getUserInfo();
+      } else {
+        clearLogin();
+      }
     };
     // 出错是刷新
     const refreshAll = async () => {
@@ -233,8 +208,8 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       });
     };
     // change api env
-    const changeApiEnv = (env: ApiEnv) => {
-      const lastEnv = getConfig().apiEnv;
+    const changeApiEnv = (env: AppEnv) => {
+      const lastEnv = getConfig().appEnv;
       if (lastEnv === env) return;
       Taro.setStorageSync(StorageKeys.API_ENV, env);
       clearLogin();
@@ -299,10 +274,8 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       setUserInfo,
       getUserInfo,
       setToken,
-      setLoginInfo,
       clearLogin,
       clearLoginAndReLaunch,
-      setLanguage,
       init,
       login,
       refreshAll,

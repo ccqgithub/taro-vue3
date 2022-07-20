@@ -1,11 +1,12 @@
-import { ApiEnv } from '@/constants';
+import { AppEnv } from '@/types';
 import * as envs from './env';
 
 export type Configs = typeof envs & {
   apiBaseUrl: string;
-  extImgBaseUrl: string;
-  apiEnv: ApiEnv;
-  apiEnvKeys: ApiEnv[];
+  h5BaseUrl: string;
+  extAssetsBaseUrl: string;
+  appEnv: AppEnv;
+  appEnvs: AppEnv[];
 };
 
 export type GetConfigs = () => Configs;
