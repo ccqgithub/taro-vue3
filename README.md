@@ -104,6 +104,10 @@ npm run dev:weapp
 - 安装[Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)插件。
 - [Vue Typescript 开发注意事项](https://vuejs.org/guide/typescript/overview.html#ide-support)。
 
+## 基础组件
+
+如果使用`template`，`taro`的基础组件在`vue`中有点问题，所以需要重新封装一下，如果缺少某组件，请在`src/components/Native/index.ts`中自行添加。
+
 ## Toast
 
 ```vue

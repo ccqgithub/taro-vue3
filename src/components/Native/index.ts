@@ -1,12 +1,20 @@
 import { FunctionalComponent, CSSProperties, h } from 'vue';
 import {
+  View,
   ViewProps,
+  ScrollView,
   ScrollViewProps,
+  Image,
   ImageProps,
+  Text,
   TextProps,
+  Button,
   ButtonProps,
+  Input,
   InputProps,
+  WebView,
   WebViewProps,
+  Textarea,
   TextareaProps,
   BaseEventOrig,
   StandardProps
@@ -78,7 +86,7 @@ const createComponent = <
   P extends Record<string, any>,
   T = TransformReact2VueType<P>
 >(
-  tag: string
+  tag: any
 ) => {
   return ((props, ctx) => {
     return h(tag, { ...props, ...ctx.attrs }, ctx.slots);
@@ -86,11 +94,11 @@ const createComponent = <
 };
 
 export * from './NPageMeta';
-export const NView = createComponent<ViewProps>('view');
-export const NImage = createComponent<ImageProps>('image');
-export const NText = createComponent<TextProps>('text');
-export const NScrollView = createComponent<ScrollViewProps>('scroll-view');
-export const NButton = createComponent<ButtonProps>('button');
-export const NInput = createComponent<InputProps>('input');
-export const NTextArea = createComponent<TextareaProps>('textarea');
-export const NWebView = createComponent<WebViewProps>('web-view');
+export const NView = createComponent<ViewProps>(View);
+export const NImage = createComponent<ImageProps>(Image);
+export const NText = createComponent<TextProps>(Text);
+export const NScrollView = createComponent<ScrollViewProps>(ScrollView);
+export const NButton = createComponent<ButtonProps>(Button);
+export const NInput = createComponent<InputProps>(Input);
+export const NTextArea = createComponent<TextareaProps>(Textarea);
+export const NWebView = createComponent<WebViewProps>(WebView);
