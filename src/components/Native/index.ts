@@ -19,6 +19,7 @@ import {
   BaseEventOrig,
   StandardProps
 } from '@tarojs/components';
+import { KebabRecord } from '@/types';
 
 export type {
   ViewProps,
@@ -35,9 +36,11 @@ export type {
 
 // get event keys from props
 // { onClick: FN } => ['click']
-type EventKeys<T> = {
-  [K in keyof T]: K extends `on${infer E}` ? Uncapitalize<E> : never;
-}[keyof T];
+type EventKeys<T> = NonNullable<
+  {
+    [K in keyof T]: K extends `on${infer E}` ? Uncapitalize<E> : never;
+  }[keyof T]
+>;
 // filter event properties
 // { onClick: FN, other: any } => { click: FN }
 type Events<T extends Record<string, any>> = {
@@ -85,7 +88,7 @@ const createComponent = <
 ) => {
   return ((props, ctx) => {
     return h(component, { ...props, ...ctx.attrs }, ctx.slots.default?.());
-  }) as FunctionalComponent<T, PropsToEmits<P>>;
+  }) as FunctionalComponent<T, PropsToEmits<P> & KebabRecord<PropsToEmits<P>>>;
 };
 
 export * from './NPageMeta';
