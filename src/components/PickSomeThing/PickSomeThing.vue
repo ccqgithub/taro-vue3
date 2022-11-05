@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Popup, NView } from '@/components';
+import { NView } from '@/components/Native';
+import { Popup } from '@/components/Popup';
 
 const props = defineProps({
   visible: {

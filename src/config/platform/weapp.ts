@@ -1,5 +1,5 @@
 import Taro, { getAccountInfoSync } from '@tarojs/taro';
-import { StorageKeys } from '@/constants';
+import { StorageKeys } from '@/constants/com';
 import { AppEnv, WeappEnv } from '@/types';
 import * as envs from '../env';
 import { GetConfigs } from '../type';
@@ -7,7 +7,7 @@ import { GetConfigs } from '../type';
 // 小程序环境和 api 环境映射
 const envMap: Record<WeappEnv, AppEnv> = {
   develop: 'dev',
-  trial: 'test',
+  trial: 'dev',
   release: 'prod'
 };
 
@@ -17,7 +17,9 @@ const getConfigs: GetConfigs = () => {
 
   // 开启调试的状态
   const systemInfo = Taro.getSystemInfoSync();
-  if (systemInfo.enableDebug) {
+  const isDevtool = systemInfo.platform === 'devtools';
+
+  if (systemInfo.enableDebug || isDevtool) {
     const storeEnv = Taro.getStorageSync(StorageKeys.API_ENV) as AppEnv;
     if (storeEnv && envs.appEnvs.includes(storeEnv)) {
       env = storeEnv;
@@ -26,9 +28,10 @@ const getConfigs: GetConfigs = () => {
 
   return {
     ...envs,
-    apiBaseUrl: envs.apiBaseUrls[env],
-    h5BaseUrl: envs.h5BaseUrls[env],
-    extAssetsBaseUrl: envs.extAssetsBaseUrls[env]
+    appEnv: env,
+    apiBaseUrl: envs.apiBaseUrls[env]!,
+    h5BaseUrl: envs.h5BaseUrls[env]!,
+    extAssetsBaseUrl: envs.extAssetsBaseUrls[env]!
   };
 };
 

@@ -5,10 +5,9 @@ export const parseMulti = (str: string) => {
   const arr = str.split(',');
   const res: Record<string, string> = {};
   for (const val of arr) {
-    const fArr = val.split(':');
-    if (fArr.length === 2) {
-      res[fArr[0]] = fArr[1];
-    }
+    const key = val.replace(/^(\w+):.+$/, '$1');
+    const v = val.replace(/^(\w+):/, '');
+    res[key] = v;
   }
   return res;
 };

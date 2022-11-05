@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Modal, NView } from '@/components';
+import { NView } from '@/components/Native';
+import { Modal } from '@/components/Modal';
 
 const props = defineProps({
   visible: {

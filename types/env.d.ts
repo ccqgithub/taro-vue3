@@ -7,4 +7,5 @@ interface CustomProcessEnv {
   readonly TARO_H5_BASE_URL: string;
   readonly TARO_EXT_ASSETS_BASE_URL: string;
   readonly TARO_PUBLIC_URL: string;
+  readonly APP_ENV: string;
 }

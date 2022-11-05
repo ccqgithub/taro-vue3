@@ -1,5 +1,9 @@
 # Taro Vue3 快速开始脚手架
 
+## Tips
+
+- 开发前请先替换自己的 app id
+
 ## 特性
 
 - [`Taro3`](https://taro-docs.jd.com/taro/docs)。
@@ -132,3 +136,14 @@ const confirmSomething = async () => {
 }
 </script>
 ```
+
+## 骨架屏
+
+和 Page 路径对应的 `pages/xxx/xxx.skeleton.wxml` 会添加在页面模板后面，可以作为Taro 节点还未渲染的默认显示。
+
+参考: 'pages/index/index.skeleton.wxml'
+
+- `glb.appInited`: `AppStore.dataInited`
+- `glb.loaded`: '页面loaded'
+- `glb.ready`: '页面主区域渲染完毕'
+- `glb.topBarHeight`: 导航栏高度

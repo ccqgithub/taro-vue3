@@ -9,7 +9,7 @@ const RealDtsCreator = DtsCreator.default;
 const root = process.cwd();
 const creator = new RealDtsCreator({
   rootDir: root,
-  namedExports: true
+  namedExports: false
 });
 
 const updateFile = async (f) => {

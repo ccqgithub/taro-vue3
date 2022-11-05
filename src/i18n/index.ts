@@ -4,6 +4,8 @@ import {
   setStorageSync
 } from '@tarojs/taro';
 import { createI18n } from 'vue-i18n';
+import zhJson from './locales/zh-Hans.json';
+import enJson from './locales/en-US.json';
 
 const languageKey = 'language';
 
@@ -13,13 +15,19 @@ export enum LangType {
   EN = 'en-US'
 }
 
+export const WechatLang: Record<string, string> = {
+  [LangType.EN]: 'en',
+  [LangType.ZH]: 'zh_CN'
+};
+
 // 支持的语言
 export const languages = [LangType.ZH, LangType.EN];
 
 // 语言映射
 export const languagesMap: [RegExp, LangType][] = [
   [/^zh-hans-*/i, LangType.ZH],
-  [/^zh-*/i, LangType.ZH]
+  [/^zh-*/i, LangType.ZH],
+  [/^en-*/i, LangType.EN]
 ];
 
 // 选择语言
@@ -35,7 +43,7 @@ export const LangSelects: { value: LangType; text: string }[] = [
 ];
 
 // 默认语言
-export const defaultLanguage: LangType = LangType.EN;
+export const defaultLanguage: LangType = LangType.ZH;
 
 export const normalizeLang = (lang: string): string => {
   if (!lang) return '';
@@ -56,34 +64,38 @@ export const getLangFromStore = () => {
 };
 
 export const getInitLanguage = (): LangType => {
-  let lang = '';
+  // let lang = '';
 
-  lang = getLangFromStore();
-  if (lang) return lang as LangType;
+  // lang = getLangFromStore();
+  // if (lang) return lang as LangType;
 
-  lang = getLangFromSystem();
-  if (lang) return lang as LangType;
+  // lang = getLangFromSystem();
+  // if (lang) return lang as LangType;
 
   return defaultLanguage;
 };
 
 export const i18nMessages = {
-  [LangType.ZH]: {},
-  [LangType.EN]: {}
+  [LangType.ZH]: zhJson,
+  [LangType.EN]: enJson
 };
 
 const lang = getInitLanguage();
 
-setStorageSync(languageKey, lang[0]);
+setStorageSync(languageKey, lang);
 
 export const i18n = createI18n({
   legacy: false,
-  locale: lang[0],
-  fallbackLocale: lang[0],
+  locale: lang,
+  fallbackLocale: lang,
   messages: i18nMessages
 });
 
 export const setLanguage = (lang: LangType) => {
   i18n.global.locale.value = lang;
   setStorageSync(languageKey, lang);
+};
+
+export const getWechatLang = () => {
+  return WechatLang[i18n.global.locale.value];
 };

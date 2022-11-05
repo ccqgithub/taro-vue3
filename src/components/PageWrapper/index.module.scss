@@ -1,24 +1,66 @@
-.pageMain {
-  height: 0;
-  flex: 1 1 auto;
-}
-
-.pageScroll {
-  height: 100%;
-}
-
-.tabBar {
-  position: relative;
-}
+@use "@/style/var.scss";
 
 .page {
+  width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  position: relative;
+  overflow-x: hidden;
+  z-index: 1;
+}
 
-  &.hasTab {
-    height: 100%;
+.nav {
+  flex: 0 0 auto;
+}
+
+.pageMain {
+  height: 0;
+  flex: 1 1 auto;
+  position: relative;
+  z-index: 3;
+}
+
+.tabBar {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+// IntersectionObserver
+.observerBox {
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.observer {
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+  overflow: hidden;
+
+  &.isDark {
+    background: #fff;
+  }
+
+  &.isLight {
+    background: var.$colorPrimary;
   }
 }

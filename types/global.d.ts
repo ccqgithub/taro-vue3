@@ -1,4 +1,5 @@
-/// <reference path="node_modules/@tarojs/plugin-platform-weapp/types/index.d.ts" />
+/// <reference types="@tarojs/taro" />
+/// <reference path="../node_modules/@tarojs/components/types/index.vue3.d.ts" />
 
 declare module '*.png';
 declare module '*.gif';
@@ -25,6 +26,12 @@ declare namespace NodeJS {
       | 'jd';
     readonly TARO_AUTHING_APP_ID: string;
   }
+}
+
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue';
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
 }
 
 declare module '@tarojs/components' {

@@ -1,33 +1,10 @@
 import Taro from '@tarojs/taro';
 import { request } from '@/service';
-import { User } from '@/types';
 
 export type LoginResp = {
   accessToken: string;
   refreshToken: string;
   expireIn: number;
-};
-
-export const loginByCode = async () => {
-  try {
-    const { code } = await Taro.login();
-    console.log(code);
-    return Promise.resolve<LoginResp>({
-      accessToken: 'ACCESS_TOKEN',
-      refreshToken: 'ACCESS_TOKEN',
-      expireIn: 7200
-    });
-    // return request.post<LoginResp>({
-    //   url: '/login',
-    //   data: params,
-    //   noToken: true
-    // });
-  } catch (e: any) {
-    if (e.info?.code === 401) {
-      return null;
-    }
-    throw e;
-  }
 };
 
 export const loginByPhone = async (args: {
@@ -59,8 +36,8 @@ export const logout = () => {
   // });
 };
 
-export const getUserInfo = () => {
-  return Promise.resolve<User>({
+export const getUserInfo = (token?: any) => {
+  return Promise.resolve<any>({
     id: '1',
     photo: '',
     nickname: 'Season Chen'

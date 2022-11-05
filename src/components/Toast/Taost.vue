@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, PropType } from 'vue';
-import { NView, NImage, Portal } from '@/components';
+import { NView, NImage } from '@/components/Native';
+import iconDown from '@/assets/icon/done-white.svg';
+import { uniqueKey } from '@/utils';
+import { useTransition } from '@/use';
 import type { ToastItem } from './types';
-import * as S from './index.module.scss';
+import S from './index.module.scss';
 
 const props = defineProps({
   icon: {
@@ -11,7 +14,7 @@ const props = defineProps({
   },
   duration: {
     type: Number,
-    default: 3000
+    default: 1500
   },
   title: {
     type: String,
@@ -22,8 +25,27 @@ const emit = defineEmits<{
   (e: 'remove'): void;
 }>();
 
+const cls = uniqueKey('toast');
+const images = {
+  success: iconDown
+};
 let timer: ReturnType<typeof setTimeout> | null = null;
 const visible = ref(false);
+
+// transition
+const {
+  visible: transitionVisible,
+  classes: transitionClasses,
+  onTranstionEnd
+} = useTransition({
+  selector: `.${cls}`,
+  visible,
+  enterClass: S.enter,
+  leaveClass: S.leave,
+  onHide: () => {
+    emit('remove');
+  }
+});
 
 onMounted(() => {
   visible.value = true;
@@ -31,8 +53,8 @@ onMounted(() => {
     visible.value = false;
     timer = setTimeout(() => {
       emit('remove');
-    }, 1000);
-  }, props.duration + 500);
+    }, 150);
+  }, props.duration + 150);
 });
 
 onUnmounted(() => {
@@ -41,22 +63,35 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Portal>
-    <Transition name="fade" type="animation">
+  <NView
+    v-if="transitionVisible"
+    :class="{
+      [S.toast]: true,
+      [cls]: true,
+      [transitionClasses]: true
+    }"
+    @transitionend="onTranstionEnd"
+  >
+    <NView
+      :class="{
+        [S.content]: true,
+        [S.hasIcon]: props.icon !== 'none'
+      }"
+    >
+      <NImage
+        v-if="(images as any)[props.icon]"
+        :class="S.icon"
+        :src="(images as any)[props.icon]"
+        mode="aspectFit"
+      ></NImage>
       <NView
-        v-if="visible"
-        :class="S.toast"
-        :style="{ animationDuration: visible ? '0.5s' : '0.3s' }"
+        :class="{
+          [S.title]: true,
+          [S.hasIcon]: props.icon !== 'none'
+        }"
       >
-        <NView :class="S.content">
-          <NImage
-            v-if="props.icon !== 'none'"
-            :src="props.icon"
-            mode="aspectFit"
-          ></NImage>
-          <NView :class="S.title">{{ props.title }}</NView>
-        </NView>
+        {{ props.title }}
       </NView>
-    </Transition>
-  </Portal>
+    </NView>
+  </NView>
 </template>

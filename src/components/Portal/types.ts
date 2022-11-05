@@ -1,5 +1,5 @@
 import { Component, PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
 
 export type PortalItem<
   P extends Record<string, any> = Record<string, any>,
@@ -8,6 +8,7 @@ export type PortalItem<
   key: string;
   component: C;
   props: P;
+  page: string;
 };
 
 export type ContextValue = {

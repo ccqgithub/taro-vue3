@@ -1,128 +1,180 @@
 <script setup lang="ts">
-import { computed, watch, onUnmounted } from 'vue';
-import { NView, NText, Portal } from '@/components';
-import { getZIndex } from '@/utils';
-import { usePage } from '@/use';
+import { computed, onUnmounted, ref, toRefs } from 'vue';
+import { NView, NButton, NText } from '@/components/Native';
+import { Portal } from '@/components/Portal';
+import { getZIndex, uniqueKey, normalizeError } from '@/utils';
+import { usePage, useTransition } from '@/use';
 import { IConfirmModalProps } from './types';
-import * as S from './index.module.scss';
+import S from './index.module.scss';
 
 const props = defineProps(IConfirmModalProps);
 const emit = defineEmits<{
   (e: 'update:visible', v: boolean): void;
   (e: 'ok'): void;
-  (e: 'cancel'): void;
+  (e: 'cancel', v?: false): void;
   (e: 'unmount'): void;
+  (e: 'show'): void;
+  (e: 'hide'): void;
+  (e: 'init'): void;
+  (e: 'initChange', v: boolean): void;
 }>();
 
 const { showPopup, hidePopup } = usePage();
+
+const popupCls = uniqueKey('popup');
+const showCount = ref(0);
+const { visible } = toRefs(props);
+
 const zIndex = computed(() => {
-  if (props.visible) return 0;
   return props.zIndex || getZIndex();
 });
 
-const doOk = () => {
+// transition
+const {
+  visible: transitionVisible,
+  classes: transitionClasses,
+  inited,
+  onTranstionEnd
+} = useTransition({
+  selector: `.${popupCls}`,
+  visible,
+  enterClass: S.enter,
+  leaveClass: S.leave,
+  onShow: () => {
+    emit('show');
+    showPopup();
+  },
+  onHide: () => {
+    emit('hide');
+    hidePopup();
+  },
+  onInit: () => {
+    emit('init');
+  },
+  onInitedChange: (v) => {
+    emit('initChange', v);
+  }
+});
+
+const doOk = async () => {
+  if (props.openType) return;
+
   if (props.okDisabled) return;
   if (!props.ok) return;
+
+  try {
+    const canClose = await props.okClick();
+    if (!canClose) return;
+  } catch (e) {
+    normalizeError(e, {}, 'ConfirmModal.doOk');
+  }
+
   emit('ok');
+
   if (!props.customOk) {
     emit('update:visible', false);
   }
 };
 
-const doCancel = () => {
+const onOpenType = (e: any) => {
+  props.openTypeClick(e);
+  emit('ok');
+  emit('update:visible', false);
+};
+
+const doCancel = (cancelClick = false) => {
   if (props.cancelDisabled) return;
   if (!props.cancel) return;
-  emit('cancel');
+
+  emit('cancel', cancelClick ? false : undefined);
+
   if (!props.customCancel) {
     emit('update:visible', false);
   }
 };
 
-const stopWatch = watch(
-  () => props.visible,
-  () => {
-    // hide
-    if (!props.visible) {
-      hidePopup();
-    }
-    // show
-    if (props.visible) {
-      showPopup();
-    }
-  }
-);
-
 onUnmounted(() => {
-  stopWatch();
   emit('unmount');
 });
 </script>
 
 <template>
   <!-- mask -->
-  <Portal>
-    <Transition name="fade" type="animation">
-      <NView
-        v-if="props.visible && props.mask"
-        :class="S.mask"
-        :style="{
-          zIndex,
-          opacity: `${props.opacity}`,
-          animationDuration: props.visible ? '0.3s' : '0.1s'
-        }"
-        @tap="maskClose && doCancel()"
-      ></NView>
-    </Transition>
+  <Portal
+    :style="{
+      zIndex
+    }"
+  >
+    <NView
+      v-if="props.mask && transitionVisible"
+      :class="{
+        [S.mask]: true,
+        [transitionClasses]: true
+      }"
+      :style="{
+        zIndex,
+        opacity: props.hidden ? 0 : undefined
+      }"
+      @tap="maskClose && doCancel()"
+      @transitionend="onTranstionEnd"
+    ></NView>
 
     <!-- popup -->
-    <Transition name="move" type="animation">
+    <NView
+      v-if="transitionVisible"
+      :class="{
+        [S.modal]: true,
+        [transitionClasses]: true,
+        [popupCls]: true
+      }"
+      :style="{
+        zIndex,
+        opacity: props.hidden ? 0 : undefined
+      }"
+      @transitionend="onTranstionEnd"
+    >
       <NView
-        v-if="props.visible"
-        :class="S.modal"
-        :style="{
-          zIndex,
-          opacity: `${props.opacity}`,
-          animationDuration: props.visible ? '0.3s' : '0.1s'
+        :class="{
+          [S.title]: true,
+          [S.noContent]: !$slots.content && !props.content
         }"
       >
-        <NView :class="S.title">
-          <NText v-if="!$slots.title && props.title">{{ props.title }}</NText>
-          <slot name="title" />
-        </NView>
-
-        <NView :class="S.content">
-          <NText v-if="!$slots.content && props.content">{{
-            props.content
-          }}</NText>
-          <slot />
-        </NView>
-
-        <NView :class="S.btns">
-          <!-- ok -->
-          <NView
-            :class="{
-              [S.btn]: true,
-              [S.ok]: true,
-              [S.isDisabled]: props.okDisabled
-            }"
-            @tap="doOk"
-          >
-            <NText>{{ props.okText }}</NText>
-          </NView>
-          <!-- cancel -->
-          <NView
-            v-if="props.cancel"
-            :class="{
-              [S.btn]: true,
-              [S.cancel]: true,
-              [S.isDisabled]: props.cancelDisabled
-            }"
-            @tap="doCancel"
-          >
-            <NText>{{ props.cancelText }}</NText>
-          </NView>
-        </NView>
+        <NText v-if="!$slots.title && props.title">{{ props.title }}</NText>
+        <slot name="title" />
       </NView>
-    </Transition>
+
+      <NView v-if="!$slots.content && props.content" :class="S.content">
+        <NText>{{ props.content }}</NText>
+        <slot :show="props.visible" :show-count="showCount" :inited="inited" />
+      </NView>
+
+      <NView :class="S.btns">
+        <!-- cancel -->
+        <NButton
+          v-if="props.cancel"
+          :class="{
+            [S.btn]: true,
+            [S.cancel]: true,
+            [S.isDisabled]: props.cancelDisabled
+          }"
+          @tap="doCancel(true)"
+        >
+          <NText>{{ props.cancelText }}</NText>
+        </NButton>
+        <!-- ok -->
+        <NButton
+          :class="{
+            [S.btn]: true,
+            [S.ok]: true,
+            [S.isDisabled]: props.okDisabled
+          }"
+          :open-type="props.openType"
+          @chooseavatar="(e) => onOpenType(e)"
+          @tap="doOk"
+        >
+          <NText>{{ props.okText }}</NText>
+        </NButton>
+      </NView>
+    </NView>
   </Portal>
 </template>

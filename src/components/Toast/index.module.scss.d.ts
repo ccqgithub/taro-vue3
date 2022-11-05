@@ -1,6 +1,11 @@
-export const __esModule: true;
-export const toast: string;
-export const fadeIn: string;
-export const content: string;
-export const title: string;
+declare const styles: {
+  readonly "toast": string;
+  readonly "enter": string;
+  readonly "leave": string;
+  readonly "content": string;
+  readonly "hasIcon": string;
+  readonly "title": string;
+  readonly "icon": string;
+};
+export = styles;
 

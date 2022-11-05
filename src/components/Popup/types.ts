@@ -1,5 +1,6 @@
 import { PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
+import { i18n } from '@/i18n';
 
 export const IPopupProps = {
   visible: {
@@ -21,7 +22,7 @@ export const IPopupProps = {
   },
   cancelText: {
     type: String,
-    default: '取消'
+    default: () => i18n.global.t('com.cancel')
   },
   cancelIcon: {
     type: String as PropType<'CLOSE' | 'BACK' | 'DOWN'>,
@@ -36,23 +37,22 @@ export const IPopupProps = {
     type: Boolean,
     default: false
   },
-  // show ok button
+  // ok
   ok: {
     type: Boolean,
     default: true
   },
   okText: {
     type: String,
-    default: '确定'
+    default: ''
   },
   okDisabled: {
     type: Boolean,
     default: false
   },
-  // 自定义ok按钮逻辑
   customOk: {
     type: Boolean,
-    default: false
+    default: true
   },
   // show mask
   mask: {
@@ -72,6 +72,11 @@ export const IPopupProps = {
     type: Number,
     default: 0
   },
+  // 安全高度： 高度不包含安全区域
+  safeHeight: {
+    type: Boolean,
+    default: false
+  },
   // 内容高度
   height: {
     type: [Number, String] as PropType<'100%' | number>,
@@ -88,9 +93,24 @@ export const IPopupProps = {
     default: 0
   },
   // 透明度，用在多个弹窗重叠时，隐藏后面的 0 - 1
-  opacity: {
-    type: Number,
-    default: 1
+  hidden: {
+    type: Boolean,
+    default: false
+  },
+  // background:
+  background: {
+    type: String,
+    default: '#ffffff'
+  },
+  // loading
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  // 动画完成后再显示
+  hideWhenAnimate: {
+    type: Boolean,
+    default: true
   }
 };
 

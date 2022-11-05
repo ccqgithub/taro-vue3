@@ -25,7 +25,9 @@
     "jsx": "preserve",
     "lib": ["esnext", "dom", "dom.iterable"],
     "types": ["node", "miniprogram-api-typings"],
-    "isolatedModules": true
+    "isolatedModules": false,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": [
     "*.ts",
@@ -35,7 +37,7 @@
     "config/**/*.js"
   ],
   "exclude": [
-    "node_modules",
+    "node_modules/**",
     "dist"
   ],
   "compileOnSave": false

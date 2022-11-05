@@ -6,9 +6,9 @@ const getConfigs: GetConfigs = () => {
 
   return {
     ...envs,
-    apiBaseUrl: envs.apiBaseUrls[env],
-    h5BaseUrl: envs.h5BaseUrls[env],
-    extAssetsBaseUrl: envs.extAssetsBaseUrls[env]
+    apiBaseUrl: envs.apiBaseUrls[env]!,
+    h5BaseUrl: envs.h5BaseUrls[env]!,
+    extAssetsBaseUrl: envs.extAssetsBaseUrls[env]!
   };
 };
 

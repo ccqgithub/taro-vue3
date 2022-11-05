@@ -1,21 +1,23 @@
 import Taro from '@tarojs/taro';
 import { getConfig } from '@/config';
-import {
-  joinUrl,
-  debug,
-  GeneralError,
-  ErrorType,
-  normalizeError
-} from '@/utils';
-import { loginByCode } from '@/service';
-import { getGlobalStore } from '@/store';
+import { joinUrl } from '@/utils/url';
+import { GeneralError, ErrorType, normalizeError } from '@/utils/error';
+import { debug } from '@/utils/debug';
+import { getGlobalStore } from '@/store/globalStore';
 import { i18n } from '@/i18n';
-import { IToken } from '@/types';
+
+export type IToken = {
+  accessToken?: string;
+  refreshToken?: string;
+  expireIn: number;
+  newUser?: boolean;
+};
 
 // 是否有 refresh token 逻辑
-const USE_REFRESH_TOKEN = true;
+const USE_REFRESH_TOKEN = false;
 export const ServerErrMsg = '抱歉，服务器出错。请稍后再试。';
-const checkIsRefreshToken = (url = '') => url.indexOf('refresh-token') !== -1;
+const checkIsRefreshToken = (url = '') => url.indexOf('/token') !== -1;
+const checkIsLoginByCode = (url = '') => url.indexOf('/login-by-code') !== -1;
 
 // refresh token 最大尝试次数
 const refreshTokenRetryCount = 5;
@@ -29,6 +31,10 @@ interface IRequestParams {
   contentType?: string;
   replaceBaseUrl?: string;
   retryCount?: number;
+  // 已经刷新过token，不需要再刷新
+  hasRefreshToken?: boolean;
+  // token
+  token?: IToken;
 }
 
 export type SuccessCallbackResult<T> = {
@@ -46,35 +52,71 @@ type OptionType = {
   mode?: 'no-cors' | 'cors' | 'same-origin';
 };
 
+export const loginByCode = async () => {
+  try {
+    const { code } = await Taro.login();
+    console.log(code);
+    return Promise.resolve<any>({
+      accessToken: 'ACCESS_TOKEN',
+      refreshToken: 'ACCESS_TOKEN',
+      expireIn: 7200
+    });
+    // return request.post<LoginResp>({
+    //   url: '/login',
+    //   data: params,
+    //   noToken: true
+    // });
+  } catch (e: any) {
+    if (e.info?.code === 401) {
+      return null;
+    }
+    throw e;
+  }
+};
+
 const request = {
   async taroRequest<T>(params: IRequestParams, method = 'GET'): Promise<T> {
+    const globalStore = getGlobalStore()!;
+    const loginToken = globalStore.loginToken || params.token;
     const { apiBaseUrl } = getConfig();
     const { noToken = false } = params;
     const isRefreshToken = checkIsRefreshToken(params?.url);
+    const isLoginByCode = checkIsLoginByCode(params.url);
     const retryCount = params.retryCount || 0;
 
+    if (params.token) {
+      delete params['token'];
+    }
+
     // 正在刷新token, 共用 refresh token 的请求
-    if (refreshTokenPromise && !isRefreshToken && !noToken) {
+    if (refreshTokenPromise && !isRefreshToken && !isLoginByCode && !noToken) {
       return refreshTokenPromise.then(() => {
         // 刷新成功
-        return request.taroRequest<T>(params, method);
+        return request.taroRequest<T>(
+          {
+            ...params,
+            hasRefreshToken: true
+          },
+          method
+        );
       });
     }
 
-    const globalStore = getGlobalStore()!;
-    const { loginToken } = globalStore;
     const language = i18n.global.locale.value;
     const {
       url,
       data,
       contentType = 'application/json',
-      replaceBaseUrl
+      replaceBaseUrl,
+      hasRefreshToken = false
     } = params;
     // headers
     const headers: Record<string, string> = {
       'content-type': contentType,
-      'accept-language': language
+      'accept-language': language,
+      'ngrok-skip-browser-warning': '*'
     };
+
     // auth token
     if (loginToken && !noToken) {
       headers['Authorization'] = `Bearer ${loginToken.accessToken}`;
@@ -91,49 +133,81 @@ const request = {
 
     try {
       const res = await Taro.request<T>(option);
+      const { data: resData } = res;
+      const isSuccessCode = res.statusCode >= 200 && res.statusCode < 300;
+      const is401 = res.statusCode === 401;
+      const is404 = res.statusCode === 404;
+      const is409 = res.statusCode === 409;
+
       debug('request success', [
         `[${res.statusCode}] ${option.url}`,
         option,
         res
       ]);
 
-      const isSuccessCode = res.statusCode >= 200 && res.statusCode < 300;
-
-      // refresh token
-      if (isRefreshToken) {
-        // refresh token 请求成功
-        if (isSuccessCode) {
-          globalStore.setToken(res.data as unknown as IToken);
-          return res.data;
-        }
-        // token刷新失败，登录
-        const loginRes = await loginByCode().then((v) => {
-          if (v) {
-            globalStore.setToken(v);
-            return globalStore.getUserInfo();
+      // error code
+      if (!isSuccessCode) {
+        // not 401
+        if (!is401 || isRefreshToken || hasRefreshToken) {
+          let type = ErrorType.API_ERROR;
+          if (is404) {
+            type = ErrorType.NOT_FOUND;
           }
-          // refresh token 尝试失败，清除登录状态
-          globalStore.clearLogin();
-          return Promise.reject(
-            new GeneralError('登录过期', { type: ErrorType.UN_AUTHORIZED })
-          );
-        });
-        return loginRes as unknown as T;
-      }
+          if (is409) {
+            type = ErrorType.STATE_CONFLICT;
+          }
 
-      // 登录过期 / 未登录
-      if (res.statusCode === 401) {
+          return Promise.reject(
+            new GeneralError(
+              (resData as any).message ||
+                (resData as any).error ||
+                ServerErrMsg,
+              {
+                type,
+                info: {
+                  params,
+                  method,
+                  statusCode: res.statusCode,
+                  res: resData
+                }
+              },
+              'api'
+            )
+          );
+        }
+        if (isLoginByCode) {
+          return null as any;
+        }
+        // 401
         // 已经在刷新token
         if (refreshTokenPromise) {
           return refreshTokenPromise.then(() => {
-            return request.taroRequest<T>(params, method);
+            return request.taroRequest<T>(
+              {
+                ...params,
+                hasRefreshToken: true
+              },
+              method
+            );
           });
         }
         // 未登录，或者不需要refresh token
-        if (!loginToken || !USE_REFRESH_TOKEN) {
+        if (!loginToken) {
           globalStore.clearLogin();
-          return await Promise.reject(
-            new GeneralError('登录过期', { type: ErrorType.UN_AUTHORIZED })
+          return Promise.reject(
+            new GeneralError(
+              '登录过期',
+              {
+                type: ErrorType.UN_AUTHORIZED,
+                info: {
+                  params,
+                  method,
+                  statusCode: res.statusCode,
+                  res: res.data
+                }
+              },
+              'api'
+            )
           );
         }
         // 其他接口等等 refresh token 完成再调用
@@ -150,36 +224,49 @@ const request = {
           };
         });
         // 登录过期，刷新token
-        const promise = request
-          .post<IToken>({
-            url: '/v1/refresh-token',
-            noToken: true,
-            data: {
-              refreshToken: loginToken.refreshToken
+        const promise = Promise.resolve()
+          .then(() => {
+            if (USE_REFRESH_TOKEN) {
+              return request
+                .post<IToken>({
+                  url: 'mini-program/v1/token',
+                  noToken: true,
+                  data: {
+                    refreshToken: loginToken.refreshToken
+                  }
+                })
+                .catch(() => loginByCode());
             }
-          })
-          .then((v) => {
-            resolve && resolve(v);
-            return request.taroRequest<T>(params, method);
+            return loginByCode();
           })
           .catch((e) => {
             reject && reject(e);
-            throw e;
+            globalStore.clearLogin();
+            throw new GeneralError(
+              '登录过期',
+              {
+                type: ErrorType.UN_AUTHORIZED,
+                info: {
+                  params,
+                  method
+                }
+              },
+              'api'
+            );
+          })
+          .then((v) => {
+            globalStore.setToken(v);
+            resolve && resolve(v);
+            return request.taroRequest<T>(
+              {
+                ...params,
+                hasRefreshToken: true
+              },
+              method
+            );
           });
-        return promise;
-      }
 
-      // 其他业务逻辑错误
-      if (!isSuccessCode) {
-        const { data: resData } = res;
-        return Promise.reject(
-          new GeneralError(
-            (resData as any).message || (resData as any).error || ServerErrMsg,
-            {
-              info: resData
-            }
-          )
-        );
+        return promise;
       }
 
       return res.data;
@@ -195,7 +282,17 @@ const request = {
         );
       }
       return Promise.reject(
-        normalizeError('请检查您的网络设置后重试', { type: ErrorType.NET_WORK })
+        normalizeError(
+          '请检查您的网络设置后重试',
+          {
+            type: ErrorType.NET_WORK,
+            info: {
+              params,
+              method
+            }
+          },
+          'api'
+        )
       );
     }
   },

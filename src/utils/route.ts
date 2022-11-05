@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro';
 import querystring from 'query-string';
 import { AppRoutes, getRelativeRoutePath, getRoutePath } from '@/app.config';
-import { getH5Url, CacheKeys, setCacheData } from '@/utils';
+import { CacheKeys, setCacheData } from '@/utils/cacheData';
+import { getH5Url } from '@/utils/h5';
 import { i18n } from '@/i18n';
 
 export const backToPath = (p: string) => {

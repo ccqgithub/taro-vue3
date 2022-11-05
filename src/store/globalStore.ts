@@ -1,4 +1,5 @@
-import { AppStore } from '@/store';
+import { AppStore } from '@/store/AppStore';
+import type { ConfirmProps } from '@/store/AppStore';
 
 type GlobalStore = ReturnType<ReturnType<typeof AppStore>>;
 
@@ -12,3 +13,5 @@ export const setGlobakStore = (store: GlobalStore) => {
 export const getGlobalStore = () => {
   return _globalStore;
 };
+
+export type { ConfirmProps };

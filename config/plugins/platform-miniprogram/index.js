@@ -14,28 +14,33 @@ export default (ctx, options) => {
     async fn({ config }) {
       config.onBuildFinish = ({ stats }) => {
         stats?.compilation?.entries?.forEach((entry) => {
-          if (entry.miniType !== 'PAGE') return;
+          const name = entry.options.name;
+
+          if (!name.startsWith('pages/')) return;
 
           if (
             options?.include &&
-            !options.include.some((pattern) => entry.name.match(pattern))
+            !options.include.some((pattern) => name.match(pattern))
           ) {
             return;
           }
+
           if (
             options?.exclude &&
-            options.exclude.some((pattern) => entry.name.match(pattern))
+            options.exclude.some((pattern) => name.match(pattern))
           ) {
             return;
           }
 
           const WxmlFilePath = resolve(
             config?.outputRoot ?? 'dist',
-            `${entry.name}.wxml`
+            `${name}.wxml`
           );
+
           if (!existsSync(WxmlFilePath)) return;
           const WxmlFileContent = readFileSync(WxmlFilePath, 'utf-8');
           let { prefix, suffix } = defaultOptions;
+
           if (options?.prefix) {
             if (existsSync(options.prefix)) {
               prefix = readFileSync(options.prefix, 'utf-8');
@@ -50,6 +55,7 @@ export default (ctx, options) => {
               suffix = options.suffix;
             }
           }
+
           writeFileSync(WxmlFilePath, `${prefix}${WxmlFileContent}${suffix}`);
         });
       };

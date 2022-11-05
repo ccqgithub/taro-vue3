@@ -1,5 +1,6 @@
 import { PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
+import { i18n } from '@/i18n';
 
 export const IConfirmModalProps = {
   visible: {
@@ -21,7 +22,7 @@ export const IConfirmModalProps = {
   },
   cancelText: {
     type: String,
-    default: '取消'
+    default: () => i18n.global.t('com.cancel')
   },
   cancelIcon: {
     type: String as PropType<'CLOSE' | 'BACK' | 'DOWN'>,
@@ -43,7 +44,7 @@ export const IConfirmModalProps = {
   },
   okText: {
     type: String,
-    default: '确定'
+    default: () => i18n.global.t('com.sure')
   },
   okDisabled: {
     type: Boolean,
@@ -53,6 +54,10 @@ export const IConfirmModalProps = {
   customOk: {
     type: Boolean,
     default: false
+  },
+  okClick: {
+    type: Function as PropType<() => boolean | Promise<boolean>>,
+    default: () => true
   },
   // show mask
   mask: {
@@ -68,9 +73,18 @@ export const IConfirmModalProps = {
     default: undefined
   },
   // 透明度，用在多个弹窗重叠时，隐藏后面的 0 - 1
-  opacity: {
-    type: Number,
-    default: 1
+  hidden: {
+    type: Boolean,
+    default: false
+  },
+  // open type
+  openType: {
+    type: String,
+    default: undefined
+  },
+  openTypeClick: {
+    type: Function as PropType<(v: any) => void>,
+    default: () => {}
   }
 };
 

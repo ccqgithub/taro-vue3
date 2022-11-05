@@ -1,15 +1,20 @@
-export const __esModule: true;
-export const navBar: string;
-export const isFixed: string;
-export const title: string;
-export const titleText: string;
-export const titleMain: string;
-export const btnWrapper: string;
-export const btn: string;
-export const btnCircle: string;
-export const btnGroup: string;
-export const btnSp: string;
-export const icon: string;
-export const menu: string;
-export const isMain: string;
+declare const styles: {
+  readonly "menu": string;
+  readonly "isSimple": string;
+  readonly "title": string;
+  readonly "isMain": string;
+  readonly "titleText": string;
+  readonly "titleMain": string;
+  readonly "btnWrapper": string;
+  readonly "btn": string;
+  readonly "btnCircle": string;
+  readonly "isHover": string;
+  readonly "btnSp": string;
+  readonly "icon": string;
+  readonly "btnGroup": string;
+  readonly "nav": string;
+  readonly "isFixed": string;
+  readonly "isLight": string;
+};
+export = styles;
 

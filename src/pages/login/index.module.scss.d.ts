@@ -1,3 +1,5 @@
-export const __esModule: true;
-export const box: string;
+declare const styles: {
+  readonly "box": string;
+};
+export = styles;
 

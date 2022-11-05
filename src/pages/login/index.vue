@@ -7,7 +7,7 @@ import { reportEvent, ReportKeys, showToast } from '@/utils';
 import { useAppStore, usePage } from '@/use';
 import { eventBus, EventKeys } from '@/store';
 import { loginByPhone } from '@/service';
-import * as S from './index.module.scss';
+import S from './index.module.scss';
 
 const appStore = useAppStore();
 const { params } = usePage<{ from?: string }>();
@@ -38,9 +38,9 @@ const doLogin = async (
     appStore.setToken(res);
     await appStore.getUserInfo();
     success = true;
-    reportEvent(ReportKeys.USER_LOGIN, {
-      is_new_user: 1
-    });
+    // reportEvent(ReportKeys.USER_LOGIN, {
+    //   is_new_user: 1
+    // });
     await Taro.navigateBack({
       delta: 1
     });

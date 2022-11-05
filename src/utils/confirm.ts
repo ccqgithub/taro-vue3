@@ -1,8 +1,7 @@
-import { getGlobalStore } from '@/store';
-import { ConfirmModalProps } from '@/components';
+import { getGlobalStore, ConfirmProps } from '@/store/globalStore';
 
-export const confirm = (props: ConfirmModalProps): Promise<boolean> => {
+export const confirm = async (props: ConfirmProps) => {
   const globalStore = getGlobalStore();
-  if (!globalStore) return Promise.resolve(false);
+  if (!globalStore) return false;
   return globalStore.confirm(props);
 };

@@ -1,5 +1,5 @@
-import { PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
+import { i18n } from '@/i18n';
 
 export const IModalProps = {
   visible: {
@@ -10,6 +10,10 @@ export const IModalProps = {
     type: String,
     default: ''
   },
+  content: {
+    type: String,
+    default: ''
+  },
   // show cancel button
   cancel: {
     type: Boolean,
@@ -17,18 +21,9 @@ export const IModalProps = {
   },
   cancelText: {
     type: String,
-    default: '取消'
-  },
-  cancelIcon: {
-    type: String as PropType<'CLOSE' | 'BACK' | 'DOWN'>,
-    default: 'CLOSE'
+    default: () => i18n.global.t('com.cancel')
   },
   cancelDisabled: {
-    type: Boolean,
-    default: false
-  },
-  // 自定义 cancel 按钮逻辑
-  customCancel: {
     type: Boolean,
     default: false
   },
@@ -39,14 +34,9 @@ export const IModalProps = {
   },
   okText: {
     type: String,
-    default: '确定'
+    default: () => i18n.global.t('com.sure')
   },
   okDisabled: {
-    type: Boolean,
-    default: false
-  },
-  // 自定义ok按钮逻辑
-  customOk: {
     type: Boolean,
     default: false
   },
@@ -64,9 +54,14 @@ export const IModalProps = {
     default: undefined
   },
   // 透明度，用在多个弹窗重叠时，隐藏后面的 0 - 1
-  opacity: {
-    type: Number,
-    default: 1
+  hidden: {
+    type: Boolean,
+    default: false
+  },
+  // loading
+  loading: {
+    type: Boolean,
+    default: false
   }
 };
 

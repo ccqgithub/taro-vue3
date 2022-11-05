@@ -1,0 +1,1 @@
+<view wx:if="{{!glb.appInited || !glb.ready || !root.cn || !root.cn[0]}}" style='position: fixed; left: 0px; right: 0px; top: 0px; z-index: 0; width: 100%; height: {{glb.topBarHeight}}px; background: #ff00ff;'></view>

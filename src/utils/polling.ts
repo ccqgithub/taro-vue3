@@ -25,7 +25,7 @@ export const startPollingCall = <T>(params: IPollingCallParams<T>) => {
     timer: null
   };
 
-  const item = pollingApis[params.name];
+  const item = pollingApis[params.name]!;
 
   const loop = () => {
     if (item.end) return;
@@ -57,9 +57,9 @@ export const startPollingCall = <T>(params: IPollingCallParams<T>) => {
 
 export const endPollingCall = (name: string) => {
   if (pollingApis[name]) {
-    pollingApis[name].end = true;
-    if (pollingApis[name].timer) {
-      clearTimeout(pollingApis[name].timer!);
+    pollingApis[name]!.end = true;
+    if (pollingApis[name]!.timer) {
+      clearTimeout(pollingApis[name]!.timer!);
     }
   }
   delete pollingApis[name];

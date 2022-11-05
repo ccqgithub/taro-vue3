@@ -8,9 +8,15 @@ export enum StorageKeys {
 
 export enum ErrorType {
   // 普通错误
-  ERROR,
+  ERROR = 'ERROR',
+  // 405 资源冲突
+  STATE_CONFLICT = 'STATE_CONFLICT',
+  // api error
+  API_ERROR = 'API_ERROR',
   // 网络错误
-  NET_WORK,
+  NET_WORK = 'NET_WORK',
   // token 过期
-  UN_AUTHORIZED
+  UN_AUTHORIZED = 'UN_AUTHORIZED',
+  // Not Found
+  NOT_FOUND = 'NOT_FOUND'
 }

@@ -1,4 +1,5 @@
 const path = require('path');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const loadEnvs = require('./utils/loadEnvs');
 const { createClassNamehash } = require('./utils/createClassNameHash');
 
@@ -8,7 +9,7 @@ const env = loadEnvs();
 
 const config = {
   env: { ...env },
-  projectName: 'taro-vue3',
+  projectName: 'Taro Vue 3',
   date: '2022-4-20',
   designWidth: 375,
   deviceRatio: {
@@ -16,23 +17,33 @@ const config = {
   },
   sourceRoot: 'src',
   outputRoot: `dist/${process.env.TARO_ENV_REAL}`,
+  compiler: {
+    type: 'webpack5',
+    prebundle: {
+      enable: false
+    }
+  },
   plugins: [
     [
       '@tarojs/plugin-framework-vue3',
       {
-        mini: {
+        vueLoaderOption: {
           compilerOptions: {
+            preserveWhitespace: false,
             whitespace: 'condense'
-          }
+          },
+          exposeFilename: true,
+          reactivityTransform: false
         }
       }
     ],
-    [path.resolve(__dirname, './plugins/platform-miniprogram/index.js'), {}]
+    [path.resolve(__dirname, './plugins/platform-miniprogram/index.js'), {}],
+    [path.resolve(__dirname, './plugins/page-skeleton/index.js'), {}]
   ],
   defineConstants: {
-    __VUE_I18N_LEGACY_API__: JSON.stringify('false'),
-    __VUE_I18N_FULL_INSTALL__: JSON.stringify('false'),
-    __INTLIFY_PROD_DEVTOOLS__: JSON.stringify('false')
+    __VUE_I18N_LEGACY_API__: JSON.stringify(false),
+    __VUE_I18N_FULL_INSTALL__: JSON.stringify(false),
+    __INTLIFY_PROD_DEVTOOLS__: JSON.stringify(false)
   },
   copy: {
     patterns: [
@@ -55,9 +66,12 @@ const config = {
   alias: {
     '@': path.resolve(__dirname, '../src/'),
     '~@': path.resolve(__dirname, '../src/'),
+    '@intlify/shared': '@intlify/shared/dist/shared.cjs.prod.js',
+    '@intlify/core-base': '@intlify/core-base/dist/core-base.cjs.prod.js',
     'vue-i18n': 'vue-i18n/dist/vue-i18n.runtime.esm-bundler.js'
   },
   mini: {
+    baseLevel: 32,
     minifyXML: {
       collapseWhitespace: false
     },
@@ -84,18 +98,65 @@ const config = {
               name,
               filename,
               css,
-              prefix: 't'
+              prefix: 'm-'
             });
           }
         }
       }
     },
+    imageUrlLoaderOption: {
+      limit: 0.1 * 1024
+    },
+    mediaUrlLoaderOption: {
+      limit: 0.1 * 1024
+    },
     miniCssExtractPluginOption: {
       ignoreOrder: true
     },
-    webpackChain(chain) {
+    webpackChain(chain, webpack) {
       chain.resolve.mainFields.prepend('module').clear();
+
+      const plugin = {
+        intl: {
+          plugin: webpack.ProvidePlugin,
+          args: [
+            {
+              Intl: ['@/polyfill/intl-global.ts', 'default']
+            }
+          ]
+        },
+        install: {
+          plugin: require('terser-webpack-plugin'),
+          args: [
+            {
+              test: /(runtime|vendors|taro)\.js(\?.*)?$/i,
+              terserOptions: {
+                compress: true, // 默认使用terser压缩
+                keep_classnames: false, // 不改变class名称
+                keep_fnames: false // 不改变函数名称
+              }
+            }
+          ]
+        },
+        circular: {
+          plugin: CircularDependencyPlugin,
+          args: [
+            {
+              failOnError: false,
+              allowAsyncCycles: true
+              // onDetected({ paths, compilation }) {
+              //   console.log(paths);
+              //   compilation.errors.push(new Error(paths.join(' -> ')));
+              // }
+            }
+          ]
+        }
+      };
+
       chain.merge({
+        performance: {
+          hints: false
+        },
         resolve: {
           extensions: [
             '.ts',
@@ -117,12 +178,13 @@ const config = {
               type: 'javascript/auto'
             },
             i18n: {
-              test: /langs\/[^/]*\.(json5?|ya?ml)$/,
+              test: /i18n\/locales\/[^/]*\.(json5?|ya?ml)$/,
               type: 'javascript/auto',
               loader: '@intlify/vue-i18n-loader'
             }
           }
-        }
+        },
+        plugin
       });
     }
   },

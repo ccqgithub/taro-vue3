@@ -1,4 +1,4 @@
-import { joinUrl } from '@/utils';
+import { joinUrl } from '@/utils/url';
 import { getConfig } from '@/config';
 
 const urls = {

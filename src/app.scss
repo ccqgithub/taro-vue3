@@ -14,11 +14,26 @@ textarea {
   white-space: pre-wrap; // 全局解析国际化或其他\n \t等
   word-break: break-word;
   hyphens: auto;
+  line-height: inherit;
+}
+
+view:has(page),
+div:has(page),
+html,
+window,
+body {
+  box-shadow: none;
+  overflow: hidden;
 }
 
 page {
+  width: 100%;
   height: 100%;
   word-break: break-all;
+  font-size: 12px;
+  line-height: 16px;
+  color: #000;
+  position: relative;
 }
 
 .app,
@@ -27,5 +42,16 @@ page {
 }
 
 .taro_page {
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+}
+
+custom-wrapper {
+  width: 100%;
   height: 100%;
 }

@@ -1,4 +1,7 @@
-export const __esModule: true;
-export const block: string;
-export const blockTit: string;
+declare const styles: {
+  readonly "box": string;
+  readonly "block": string;
+  readonly "blockTit": string;
+};
+export = styles;
 

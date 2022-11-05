@@ -1,16 +1,22 @@
 import { PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
 
 export const VNavBarProps = {
-  class: {
-    type: String,
-    default: undefined
+  // main: tab页
+  // sub
+  pageType: {
+    type: String as PropType<'main' | 'sub'>,
+    default: 'sub'
   },
-  // MAIN: tab页，标题大，居左
-  // SUB：子页面，标题小，居中
+  // 类型
   type: {
-    type: String as PropType<'MAIN' | 'SUB'>,
-    default: 'SUB'
+    type: String as PropType<'default' | 'fixed' | 'simple'>,
+    default: 'default'
+  },
+  // 颜色类型
+  colorType: {
+    type: String as PropType<'black' | 'light'>,
+    default: 'light'
   },
   // 标题区域, 有 title 则不显示 children
   title: {
@@ -26,16 +32,6 @@ export const VNavBarProps = {
   home: {
     type: Boolean,
     default: undefined
-  },
-  // 是否渲染占位区域：因为navbar是fixed定位，所以添加占位区域给滚动区域
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  // fixed 定位
-  fixed: {
-    type: Boolean,
-    default: false
   }
 };
 

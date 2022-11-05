@@ -1,2 +1,2 @@
 export * from './types';
-export * from './Portal';
+export { default as Portal } from './index.vue';

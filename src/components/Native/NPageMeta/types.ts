@@ -1,6 +1,6 @@
 import { PropType } from 'vue';
 import { PageMetaProps as TaroPageMetaProps } from '@tarojs/components';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
 
 export interface PageMetaPropsOrg
   extends Pick<

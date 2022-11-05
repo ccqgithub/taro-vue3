@@ -1,3 +1,23 @@
 {
-  "app.title": "app"
+  "modal.allowLocationAccessTitle": "获取你的位置信息",
+  "modal.allowLocationAccessDesc": "你的位置信息将用于定位当前距离你最近的地点",
+
+  "com.helloWorld": "你好！",
+  "com.getAvatarAndName": "获取你的昵称和头像",
+  "com.getUserAvtTip": "我们将获取您的头像以方便为您提供更好的体验。",
+  "com.getUserInfoTip": "我们将获取您的昵称和头像以方便为您提供更好的体验。",
+  "com.cancel": "取消",
+  "com.sure": "确定",
+  "com.return": "返回",
+  "com.serverError": "服务器错误",
+  "com.serverErrorMsg": "抱歉，服务器出错。请稍后再试。",
+  "com.refresh": "刷新",
+  "com.networkError": "网络不可用",
+  "com.networkErrorMsg": "请检查您的网络设置后重试。",
+  "com.submit": "提交",
+  "com.reachLower": "已经到底了",
+  "com.selectDistrict": "选择区",
+  "com.env": "环境",
+  "com.close": "关闭",
+  "com.any": "任意"
 }

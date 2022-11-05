@@ -1,18 +1,11 @@
-import { CSSProperties, PropType } from 'vue';
-import { GeneralError, TypeFromProps } from '@/utils';
+import { PropType } from 'vue';
+import { GeneralError } from '@/utils';
+import { TypeFromProps } from '@/types';
 
 export const VErrorWrapperProps = {
   error: {
     type: Object as PropType<GeneralError | null>,
     default: null
-  },
-  class: {
-    type: String,
-    default: undefined
-  },
-  style: {
-    type: Object as PropType<CSSProperties>,
-    default: undefined
   }
 };
 

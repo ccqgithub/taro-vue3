@@ -1,38 +1,50 @@
 .toast {
-  min-width: 50px;
   overflow: hidden;
   z-index: 99999;
-  opacity: 1;
   position: fixed;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
 
-  &:global(.fade-enter-active) {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-  &:global(.fade-leave-active) {
-    animation: fadeIn 0.3s ease-in reverse forwards;
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
+  &.enter {
+    transition: opacity 150ms ease-out;
     opacity: 1;
+  }
+
+  &.leave {
+    transition: opacity 300ms ease-in;
+    opacity: 0;
   }
 }
 
 .content {
-  min-width: 50px;
   text-align: center;
   border-radius: 8px;
   padding: 16px;
-  background: rgb(0 0 0 / 0.5);
+  background: #4c4c4c;
+
+  &.hasIcon {
+    padding: 28px 16px;
+  }
 }
 
 .title {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 24px;
+  opacity: 0.9;
+
+  &.hasIcon {
+    min-width: 112px;
+  }
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 16px;
 }

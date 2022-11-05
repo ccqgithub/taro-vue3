@@ -1,23 +1,8 @@
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes moveIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+@use "sass:color";
+@use "@/style/var.scss";
 
 .modal {
-  width: 295px;
+  width: 320px;
   background: #fff;
   border-radius: 8px;
   position: fixed;
@@ -25,12 +10,16 @@
   left: 50%;
   z-index: 1001;
   transform: translate(-50%, -50%);
+  opacity: 0;
 
-  &:global(.move-enter-active) {
-    animation: moveIn 0.3s ease forwards;
+  &.enter {
+    opacity: 1;
+    transition: opacity 150ms ease-out;
   }
-  &:global(.move-leave-active) {
-    animation: moveIn 0.3s ease reverse forwards;
+
+  &.leave {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
   }
 }
 
@@ -42,34 +31,39 @@
   height: 100%;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
 
-  &:global(.fade-enter-active) {
-    animation: fadeIn 0.3s ease-out forwards;
+  &.enter {
+    opacity: 1;
+    transition: opacity 150ms ease-out;
   }
-  &:global(.fade-leave-active) {
-    animation: fadeIn 0.3s ease-in reverse forwards;
-  }
-}
 
-.ok {
-  width: 295px;
-  height: 50px;
-  color: rgb(23, 131, 194);
-  line-height: 50px;
-  text-align: center;
-
-  &.isDisabled {
-    color: #ccc;
+  &.leave {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
   }
 }
 
-.cancel {
-  color: #555;
-  line-height: 50px;
+.title {
+  padding: 32px 24px 0;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 24px;
+  color: #333;
   text-align: center;
+}
 
-  &.isDisabled {
-    color: #ccc;
+.content {
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 20px;
+  opacity: 0.5;
+  color: #333;
+  text-align: center;
+  padding: 16px 24px 32px;
+
+  &:first-child {
+    padding-top: 32px;
   }
 }
 
@@ -77,4 +71,46 @@
   height: 1px;
   background-color: #ddd;
   transform: scaleY(0.5);
+}
+
+.btns {
+  box-shadow: inset 0px -0.5px 0px 0px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: stretch;
+
+  .btn {
+    flex: 1 1 0;
+    line-height: 55px;
+    text-align: center;
+    height: 55px;
+    font-weight: 600;
+    font-size: 17px;
+    color: #333;
+    border-radius: 0;
+    border: none;
+    outline: none;
+
+    &::after,
+    &::before {
+      display: none;
+    }
+
+    &:nth-child(2) {
+      box-shadow: -0.5px 0px 0px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .ok {
+    color: #576b95;
+
+    &.isDisabled {
+      opacity: 0.5;
+    }
+  }
+
+  .cancel {
+    &.isDisabled {
+      color: #ccc;
+    }
+  }
 }

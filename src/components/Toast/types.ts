@@ -1,14 +1,15 @@
 import { PropType } from 'vue';
-import { TypeFromProps } from '@/utils';
+import { TypeFromProps } from '@/types';
 
 export type ToastConfig = {
   title: string;
   duration?: number;
-  icon?: 'success' | 'error' | 'none';
+  icon?: 'success' | 'none';
 };
 
 export type ToastItem = ToastConfig & {
   key: string;
+  page: string;
 };
 
 export const IToastProps = {

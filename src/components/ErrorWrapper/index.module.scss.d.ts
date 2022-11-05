@@ -1,8 +1,10 @@
-export const __esModule: true;
-export const box: string;
-export const con: string;
-export const icon: string;
-export const title: string;
-export const text: string;
-export const refresh: string;
+declare const styles: {
+  readonly "box": string;
+  readonly "con": string;
+  readonly "icon": string;
+  readonly "title": string;
+  readonly "text": string;
+  readonly "refresh": string;
+};
+export = styles;
 

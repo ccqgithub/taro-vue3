@@ -2,12 +2,18 @@ import { InjectionKey, VNode } from 'vue';
 
 export type PageContextValue = {
   state: {
+    page: string;
     hasTab: boolean;
     customNav: boolean;
-    isShow: boolean;
-    isReady: boolean;
     params: Record<string, string>;
     popupCount: number;
+    isLoaded: boolean;
+    isShow: boolean;
+    isReady: boolean;
+    showPage: string;
+    showTime: number;
+    lastShowPage: string;
+    lastShowTime: number;
   };
   showPopup: () => void;
   hidePopup: () => void;

@@ -19,8 +19,15 @@ export type GetPhoneRes = {
   unionid: string;
 };
 
+export type UserInfo = {
+  id: string;
+  nickname: string;
+  avatar: string;
+};
+
 export type IToken = {
   accessToken?: string;
   refreshToken?: string;
   expireIn: number;
+  newUser?: boolean;
 };

@@ -1,26 +1,36 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import Taro from '@tarojs/taro';
-import { NView, NImage, NText } from '@/components';
-import { usePage } from '@/use';
-import { getLayout } from '@/utils';
-import { isTabPath } from '@/app.config';
+import { NView, NImage, NText } from '@/components/Native';
+import { usePage, useLayout } from '@/use';
+import { isTabPath, getRoutePath } from '@/app.config';
 import imgBack from '@/assets/icon/back.svg';
 import imgHome from '@/assets/icon/home.svg';
-import NavBarPlaceholder from './NavBarPlaceholder.vue';
+import imgBackWhite from '@/assets/icon/back-white.svg';
+import imgHomeWhite from '@/assets/icon/home-white.svg';
 import { VNavBarProps } from './types';
-import * as S from './index.module.scss';
+import S from './index.module.scss';
 
 const props = defineProps(VNavBarProps);
+
 const { isShow } = usePage();
-const isMain = computed(() => {
-  return props.type === 'MAIN';
+const iconBack = computed(() => {
+  if (props.colorType === 'light') return imgBackWhite;
+  return imgBack;
 });
+const iconHome = computed(() => {
+  if (props.colorType === 'light') return imgHomeWhite;
+  return imgHome;
+});
+const isMain = computed(() => {
+  return props.pageType === 'main';
+});
+
 const showHome = computed(() => {
   if (props.home === false) return false;
   if (!isShow.value) return false;
   const pages = Taro.getCurrentPages();
-  if (pages.length === 1 && !isTabPath(pages[0].route)) {
+  if (pages.length === 1 && !isTabPath(pages[0]!.route!)) {
     return true;
   } else {
     return false;
@@ -39,11 +49,9 @@ const showBack = computed(() => {
 const showGroup = computed(() => {
   return showHome.value && showBack.value;
 });
-const { systemInfo, memuBarHeight, statusBarHeight, menuButtonInfo } =
-  getLayout({
-    bottomGap: true
-  });
-const padding = systemInfo.windowWidth - menuButtonInfo.right;
+
+const layout = useLayout();
+const padding = layout.systemInfo.windowWidth - layout.menuButtonInfo.right;
 
 const goBack = () => {
   Taro.navigateBack({
@@ -53,74 +61,96 @@ const goBack = () => {
 
 const goHome = () => {
   Taro.switchTab({
-    url: '/pages/home/index'
+    url: getRoutePath('space')
   });
 };
 </script>
 
 <template>
-  <NavBarPlaceholder v-if="props.placeholder" />
   <NView
     :class="{
-      [S.navBar]: true,
-      [S.isFixed]: fixed,
-      [props.class || '']: !!props.class
+      [S.nav]: true,
+      [S.isFixed]: props.type === 'fixed',
+      [S.isSimple]: props.type === 'simple',
+      [S.isLight]: props.colorType === 'light'
+    }"
+    :style="{
+      height: `${layout.topBarHeight}px`
     }"
   >
     <!-- status bar */ -->
-    <NView :style="{ height: `${statusBarHeight}px` }"></NView>
+    <NView
+      v-if="props.type !== 'simple'"
+      :style="{ height: `${layout.statusBarHeight}px` }"
+    ></NView>
     <!-- menu -->
     <NView
       :class="{
         [S.menu]: true,
-        [S.isMain]: type === 'MAIN'
+        [S.isSimple]: props.type === 'simple'
       }"
       :style="{
-        height: `${memuBarHeight}px`,
-        paddingLeft: `${padding}px`,
-        paddingRight: `${padding}px`
+        height: `${layout.memuBarHeight}px`,
+        paddingLeft: `${10}px`,
+        paddingRight: `${padding}px`,
+        top:
+          props.type === 'simple'
+            ? `${layout.topBarHeight - layout.memuBarHeight}px`
+            : 'auto'
       }"
     >
       <!-- 左侧按钮 -->
       <NView
         :class="S.btnWrapper"
-        :style="{ width: isMain ? 'auto' : `${menuButtonInfo.width}px` }"
+        :style="{
+          width: isMain ? 'auto' : `${layout.menuButtonInfo.width}px`
+        }"
       >
+        <!-- group -->
         <NView
           v-if="showGroup"
           :class="S.btnGroup"
-          :style="{ height: `${menuButtonInfo.height}px` }"
+          :style="{
+            height: `${layout.menuButtonInfo.height}px`
+          }"
         >
-          <NView :class="S.btn" @tap="goBack">
-            <NImage :class="S.icon" :src="imgBack" mode="aspectFit"></NImage>
+          <NView :class="S.btn" :hover-class="S.isHover" @tap="goBack">
+            <NImage :class="S.icon" :src="iconBack" mode="aspectFill"></NImage>
           </NView>
           <NView :class="S.btnSp"></NView>
-          <NView :class="S.btn" @tap="goHome">
-            <NImage :class="S.icon" :src="imgHome" mode="aspectFit"></NImage>
+          <NView :class="S.btn" :hover-class="S.isHover" @tap="goHome">
+            <NImage :class="S.icon" :src="iconHome" mode="aspectFill"></NImage>
           </NView>
         </NView>
+        <!-- back -->
         <NView
           v-if="!showGroup && showBack"
           :class="S.btn"
-          :style="{ height: `${menuButtonInfo.height}px` }"
+          :hover-class="S.isHover"
+          :style="{ height: `${layout.menuButtonInfo.height}px` }"
           @tap="goBack"
         >
-          <NImage :class="S.icon" :src="imgBack" mode="aspectFit"></NImage>
+          <NImage :class="S.icon" :src="iconBack" mode="aspectFill"></NImage>
         </NView>
+        <!-- home -->
         <NView
           v-if="!showGroup && showHome"
-          :class="S.btnCircle"
-          :style="{ height: `${menuButtonInfo.height}px` }"
+          :class="S.btn"
+          :hover-class="S.isHover"
+          :style="{ height: `${layout.menuButtonInfo.height}px` }"
           @tap="goHome"
         >
-          <NImage :class="S.icon" :src="imgHome" mode="aspectFit"></NImage>
+          <NImage :class="S.icon" :src="iconHome" mode="aspectFill"></NImage>
         </NView>
       </NView>
 
       <!-- 中间 title -->
       <NView
+        v-if="props.type !== 'simple'"
         :class="{
-          [S.title]: true
+          [S.title]: true,
+          [S.isLight]: props.colorType === 'light',
+          [S.isMain]: props.pageType === 'main'
         }"
         :style="{ paddingLeft: `${isMain ? 16 - padding : 5}px` }"
       >
@@ -128,7 +158,7 @@ const goHome = () => {
           v-if="!!props.title"
           :class="{
             [S.titleText]: true,
-            [S.titleMain]: type === 'MAIN'
+            [S.titleMain]: props.pageType === 'main'
           }"
         >
           {{ props.title }}
@@ -138,8 +168,9 @@ const goHome = () => {
 
       <!-- 胶囊位置 -->
       <NView
+        v-if="props.type !== 'simple'"
         :class="S.btnWrapper"
-        :style="{ width: `${menuButtonInfo.width}px` }"
+        :style="{ width: `${layout.menuButtonInfo.width}px` }"
       ></NView>
     </NView>
   </NView>

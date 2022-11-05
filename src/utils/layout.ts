@@ -3,7 +3,7 @@ import { getMenuButtonInfo } from '@/constants';
 
 // 获取布局信息
 export const getLayout = (args: { bottomGap?: boolean } = {}) => {
-  const { bottomGap = false } = args;
+  const { bottomGap = true } = args;
   const systemInfo = getSystemInfoSync();
   const menuButtonInfo = getMenuButtonInfo();
   const memuBarGap = menuButtonInfo.top - systemInfo.statusBarHeight!;
@@ -33,6 +33,7 @@ export const getLayout = (args: { bottomGap?: boolean } = {}) => {
 
 export const getPopupLayout = (
   args: {
+    safeHeight?: boolean;
     // popup height
     height?: number | '100%';
     // popup header height
@@ -42,7 +43,13 @@ export const getPopupLayout = (
     customNav?: boolean;
   } = {}
 ) => {
-  const { headerHeight = 52, customNav = false, gap = 0, height = 0 } = args;
+  const {
+    safeHeight = false,
+    headerHeight = 52,
+    customNav = false,
+    gap = 0,
+    height = 0
+  } = args;
   const {
     systemInfo,
     topBarHeight,
@@ -52,7 +59,9 @@ export const getPopupLayout = (
     ? systemInfo.windowHeight - topBarHeight - gap
     : systemInfo.windowHeight - gap;
   maxHeight =
-    !height || height === '100%' ? maxHeight : Math.min(maxHeight, height);
+    !height || height === '100%'
+      ? maxHeight
+      : Math.min(maxHeight, safeHeight ? height + inset.bottom : height);
   const maxContentHeight = maxHeight - inset.bottom - headerHeight;
   const contentHeight = height ? maxContentHeight : 'auto';
 

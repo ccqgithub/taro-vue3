@@ -43,7 +43,7 @@ export function formatNumber(
   // thousands
   if (thousands) {
     const arr = `${value}`.split(decimalSep);
-    arr[0] = arr[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+    arr[0] = arr[0]!.replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
     value = arr.join(decimalSep);
   }
   // sign

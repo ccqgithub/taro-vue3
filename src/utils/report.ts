@@ -1,24 +1,48 @@
 import Taro from '@tarojs/taro';
-import { debug, normalizeError } from '@/utils';
 
-export enum ReportKeys {
-  PAGE_VIEW = 'page_view',
-  OPEN_FROM_MINI_CODE = 'open_from_mini_code',
-  USER_LOGIN = 'user_login'
+interface ReportEvents {
+  page_view: {
+    path: string;
+    scene: string;
+    query: string;
+  };
+  open_from_mini_code: {
+    path: string;
+    scene: string;
+    query: string;
+  };
+  error: {
+    error_name: string;
+    error_message: string;
+    error_title: string;
+    error_type: string;
+    error_info: string;
+    error_stack: string;
+    error_position: string;
+  };
 }
 
-export const reportEvent = (
-  key: ReportKeys,
-  data: Record<string, any> = {}
+export type ReportKeys = keyof ReportEvents;
+
+const env = Taro.getAccountInfoSync().miniProgram.envVersion;
+
+export const reportEvent = <T extends ReportKeys>(
+  key: T,
+  data: ReportEvents[T]
 ) => {
-  debug('reportEvent:', [key, data]);
   try {
     try {
-      Taro.reportEvent(key, data);
+      Taro.reportEvent(key, {
+        ...(data || {}),
+        app_version: env
+      });
     } catch (e) {
-      Taro.reportAnalytics(key, data);
+      Taro.reportAnalytics(key, {
+        ...(data || {}),
+        app_version: env
+      });
     }
-  } catch (e) {
-    debug('reportEvent error:', normalizeError(e).message);
+  } catch (e: any) {
+    console.log(e);
   }
 };

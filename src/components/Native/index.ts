@@ -16,8 +16,32 @@ import {
   WebViewProps,
   Textarea,
   TextareaProps,
+  Swiper,
+  SwitchProps,
+  SwiperItem,
+  SwiperItemProps,
+  Picker,
+  PickerView,
+  PickerViewProps,
+  PickerViewColumn,
+  PickerViewColumnProps,
+  PickerMultiSelectorProps,
+  PickerTimeProps,
+  PickerDateProps,
+  PickerRegionProps,
+  PickerSelectorProps,
+  RootPortal,
   BaseEventOrig,
-  StandardProps
+  StandardProps,
+  SwiperProps,
+  CustomWrapper,
+  CustomWrapperProps,
+  PageContainer,
+  PageContainerProps,
+  Navigator,
+  NavigatorProps,
+  ITouchEvent,
+  ITouch
 } from '@tarojs/components';
 
 export type {
@@ -30,7 +54,19 @@ export type {
   InputProps,
   TextareaProps,
   WebViewProps,
-  BaseEventOrig
+  SwitchProps,
+  SwiperItemProps,
+  BaseEventOrig,
+  PickerViewProps,
+  PickerViewColumnProps,
+  PickerMultiSelectorProps,
+  PickerTimeProps,
+  PickerDateProps,
+  PickerRegionProps,
+  PickerSelectorProps,
+  CustomWrapperProps,
+  ITouchEvent,
+  ITouch
 };
 
 type LowercaseKeys<O extends Record<string, any>> = {
@@ -71,6 +107,7 @@ type SlimProps = {
 /** 转换react的类型到vue */
 type RemoveReactAttribute =
   | 'className'
+  | 'class'
   | 'style'
   | 'key'
   | 'ref'
@@ -102,3 +139,21 @@ export const NButton = createComponent<ButtonProps>(Button);
 export const NInput = createComponent<InputProps>(Input);
 export const NTextArea = createComponent<TextareaProps>(Textarea);
 export const NWebView = createComponent<WebViewProps>(WebView);
+export const NSwiper = createComponent<SwiperProps>(Swiper);
+export const NSwiperItem = createComponent<SwiperItemProps>(SwiperItem);
+export const NPicker = createComponent<
+  | PickerMultiSelectorProps
+  | PickerTimeProps
+  | PickerDateProps
+  | PickerRegionProps
+  | PickerSelectorProps
+>(Picker);
+export const NPickerView = createComponent<PickerViewProps>(PickerView);
+export const NPickerViewColumn =
+  createComponent<PickerViewColumnProps>(PickerViewColumn);
+export const NRootPortal = createComponent<{}>(RootPortal);
+export const NCustomWrapper =
+  createComponent<CustomWrapperProps>(CustomWrapper);
+export const NPageContainer =
+  createComponent<PageContainerProps>(PageContainer);
+export const NNavigator = createComponent<NavigatorProps>(Navigator);

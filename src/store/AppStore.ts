@@ -1,34 +1,46 @@
-import { getGlobalStore } from './globalStore';
-import { computed, markRaw, reactive, Ref, ref, toRefs } from 'vue';
+import {
+  computed,
+  markRaw,
+  reactive,
+  Ref,
+  ref,
+  toRefs,
+  watchEffect
+} from 'vue';
 import queryString from 'query-string';
 import { defineStore } from 'pinia';
 import { InjectionContext } from 'pinia-di';
 import Taro from '@tarojs/taro';
 import { getConfig } from '@/config';
-import { getRoutePath, AppRoutes } from '@/app.config';
-import { GeneralError, normalizeError, randomKey } from '@/utils';
+import { getRoutePath } from '@/app.config';
+import { randomKey } from '@/utils/str';
+import { GeneralError, normalizeError } from '@/utils/error';
 import { ToastItem, ToastConfig, ConfirmModalProps } from '@/components';
-import { StorageKeys, getSystemInfo, getMenuButtonInfo } from '@/constants';
-import {
-  getUserInfo as apiGetUserInfo,
-  LoginResp,
-  loginByCode,
-  loginByPhone
-} from '@/service';
-import { User, AppEnv, IToken } from '@/types';
-import { LocationStore, eventBus, EventKeys } from '@/store';
+import { StorageKeys, getSystemInfo } from '@/constants';
+import { getUserInfo as apiGetUserInfo, loginByCode } from '@/service';
+import { UserInfo, AppEnv, IToken } from '@/types';
+import { eventBus } from '@/store/eventBus';
 
-type ConfirmProps = Omit<ConfirmModalProps, 'visible'>;
+export type ConfirmProps = Omit<ConfirmModalProps, 'visible'> & {
+  closeSignalRef?: Ref<boolean>;
+};
 
+export type ConfirmModalRecord = {
+  page: string;
+  props: ConfirmProps;
+  cancel: (v?: false) => void;
+  ok: (v?: Taro.UserInfo) => void;
+  unmount: () => void;
+  hide: () => void;
+  visibleRef: Ref<boolean>;
+  onVisibleChange?: (v: boolean) => void;
+};
+
+const sysInfo = getSystemInfo();
 // token 版本号，用来强制清除登录状态
 const loginTokenVersion = 1;
 
-export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
-  const locationStore = getStore(LocationStore);
-  // 系统信息
-  const systemInfo = getSystemInfo();
-  // 胶囊信息
-  const menuButtonInfo = getMenuButtonInfo();
+export const AppStore = ({ useStoreId }: InjectionContext) => {
   // token
   let token: IToken | null = null;
   try {
@@ -43,7 +55,9 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
         token = JSON.parse(storageToken) as IToken;
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    normalizeError(e, {}, 'AppStore.token');
+  }
 
   return defineStore(useStoreId('app'), () => {
     // states
@@ -60,27 +74,25 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       // toast
       toastList: [],
       // confirm modals
-      confirmModals: new Map()
+      confirmModals: new Map(),
+      // win
+      winWidth: sysInfo.windowWidth,
+      winHeight: sysInfo.windowHeight
     }) as {
       loginToken: IToken | null;
-      userInfo: User | null;
+      userInfo: UserInfo | null;
       isShow: boolean;
       isInited: boolean;
       errors: GeneralError[];
       // toast
       toastList: ToastItem[];
       // confirmModals
-      confirmModals: Map<
-        string,
-        {
-          props: ConfirmProps;
-          cancel: () => void;
-          ok: () => void;
-          unmount: () => void;
-          visibleRef: Ref<boolean>;
-        }
-      >;
+      confirmModals: Map<string, ConfirmModalRecord>;
+      // win
+      winWidth: number;
+      winHeight: number;
     };
+
     // getters
     const dataInited = computed(() => {
       return state.isInited;
@@ -94,17 +106,19 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       state.isShow = v;
     };
     // login status
-    const setUserInfo = (v: Partial<User>) => {
+    const setUserInfo = (v: Partial<UserInfo>) => {
       state.userInfo = state.userInfo
         ? { ...state.userInfo, ...v }
-        : (v as User);
+        : (v as UserInfo);
     };
-    const getUserInfo = async () => {
+    const getUserInfo = async (token?: IToken) => {
       try {
-        const userInfo = await apiGetUserInfo();
+        const userInfo = await apiGetUserInfo(token);
+        console.log(userInfo);
         setUserInfo(userInfo);
         return state.userInfo;
-      } catch (error: any) {
+      } catch (e: any) {
+        const error = normalizeError(e, {}, 'getUserInfo');
         showToast({ title: error.message, icon: 'none' });
       }
     };
@@ -129,17 +143,17 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     // init
     const init = async () => {
       try {
-        await Promise.all([locationStore.initLocation(), login()]);
+        await Promise.all([login()]);
         state.isInited = true;
       } catch (error) {
-        console.log(error);
-        const err = normalizeError(error);
+        const err = normalizeError(error, {}, 'AppStore.init');
         showToast({ title: err.message, icon: 'none' });
         state.errors.push(err);
       }
     };
     // login
     const login = async () => {
+      if (state.loginToken) return;
       // 静默登录
       const res = await loginByCode();
       if (res) {
@@ -164,8 +178,9 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
         await Taro.checkSession();
         return true;
       } catch (e: any) {
+        const err = normalizeError(e, {}, 'checkSession');
         // 网络错误不需要判断为登录过期
-        if (/Failed to fetch/i.test(e.errMsg || '')) {
+        if (/Failed to fetch/i.test(err.message)) {
           return;
         }
         // 登录过期
@@ -193,16 +208,14 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     const loginPromise = (params: Record<string, string> = {}) => {
       return new Promise<boolean>((resove, reject) => {
         Taro.navigateTo({
-          url: `${getRoutePath(AppRoutes.login)}?${queryString.stringify(
-            params
-          )}`,
+          url: `${getRoutePath('login')}?${queryString.stringify(params)}`,
           success: () => {
-            eventBus.once(EventKeys.LoginBack, (v = {}) => {
+            eventBus.once('LoginBack', (v = {}) => {
               resove(!!v.suecess);
             });
           },
           fail: (error) => {
-            reject(normalizeError(error));
+            reject(normalizeError(error, {}, 'loginPromise'));
           }
         });
       });
@@ -230,6 +243,10 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     };
 
     const showToast = (config: ToastConfig | string) => {
+      const page = (Taro.getCurrentPages().pop()?.route || '').replace(
+        /^\//,
+        ''
+      );
       const v: ToastConfig =
         typeof config === 'string'
           ? {
@@ -240,6 +257,7 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       const key = randomKey('toast');
       state.toastList.push({
         ...v,
+        page,
         key
       });
     };
@@ -248,22 +266,71 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
     const confirm = (props: ConfirmProps) => {
       const key = randomKey('confirmModal');
       const visibleRef = ref(true);
-      return new Promise<boolean>((resolve) => {
+      const stopWatch = watchEffect(() => {
+        if (props.closeSignalRef && props.closeSignalRef.value === true) {
+          visibleRef.value = false;
+        }
+      });
+
+      return new Promise<boolean | undefined>((resolve) => {
+        const page = (Taro.getCurrentPages().pop()?.route || '').replace(
+          /^\//,
+          ''
+        );
+
         state.confirmModals.set(
           key,
           markRaw({
             props: {
               ...props
             },
+            page,
             visibleRef,
-            cancel: () => resolve(false),
+            cancel: (v) => resolve(v),
             ok: () => resolve(true),
             unmount: () => {
               state.confirmModals.delete(key);
+            },
+            hide: () => {
+              state.confirmModals.delete(key);
+            },
+            onVisibleChange: (v) => {
+              if (!v) {
+                stopWatch();
+              }
             }
           })
         );
       });
+    };
+
+    const unmountPage = (p: string) => {
+      // remove modals
+      const keys: string[] = [];
+
+      for (const [key, val] of state.confirmModals) {
+        if (val.page === p) {
+          keys.push(key);
+        }
+      }
+
+      for (const key of keys) {
+        state.confirmModals.delete(key);
+      }
+
+      // remove toast
+      state.toastList = state.toastList.filter((v) => {
+        return v.page !== p;
+      });
+    };
+
+    const reLaunch = async () => {
+      state.isInited = false;
+      clearLogin();
+      await Taro.reLaunch({
+        url: getRoutePath('space')
+      });
+      init();
     };
 
     return {
@@ -286,7 +353,9 @@ export const AppStore = ({ useStoreId, getStore }: InjectionContext) => {
       setToasts,
       showToast,
       removeToast,
-      confirm
+      confirm,
+      reLaunch,
+      unmountPage
     };
   });
 };
