@@ -7,3 +7,4 @@ export * from './useBrightness';
 export * from './useTransition';
 export * from './useLoaded';
 export * from './useLayout';
+export * from './useMounted';

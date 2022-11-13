@@ -1,15 +1,16 @@
-import { watchEffect, onMounted } from 'vue';
+import { watchEffect } from 'vue';
 import { usePage } from '@/use/usePage';
+import { useMounted } from '@/use/useMounted';
 
 export const useReady = (fn: () => void) => {
   const { isReady } = usePage();
+  const isMounted = useMounted();
 
-  onMounted(() => {
-    watchEffect(() => {
-      if (!isReady.value) return;
-      Promise.resolve().then(() => {
-        fn();
-      });
+  watchEffect(() => {
+    if (!isMounted.value) return;
+    if (!isReady.value) return;
+    Promise.resolve().then(() => {
+      fn();
     });
   });
 };

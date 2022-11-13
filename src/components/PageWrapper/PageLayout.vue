@@ -6,14 +6,14 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { ref, useAttrs, onMounted, computed, watchEffect } from 'vue';
+import { ref, useAttrs, computed, watchEffect } from 'vue';
 import Taro from '@tarojs/taro';
 import { NView } from '@/components/Native';
 import { NavBar } from '@/components/NavBar';
 import { TabBar } from '@/components/TabBar';
 import { Settings } from '@/components/Settings';
 import { LoadingAbsolute } from '@/components/Loading';
-import { usePage, useLayout } from '@/use';
+import { usePage, useLayout, useMounted } from '@/use';
 import { uniqueKey } from '@/utils';
 import { VPageLayoutProps } from './types';
 import S from './index.module.scss';
@@ -21,6 +21,7 @@ import S from './index.module.scss';
 const props = defineProps(VPageLayoutProps);
 const attrs = useAttrs();
 const layout = useLayout();
+const isMounted = useMounted();
 
 const mainRect = ref<{ width: number; height: number; top: number } | null>(
   null
@@ -66,18 +67,17 @@ const updateSize = (callback?: () => void) => {
   });
 };
 
-onMounted(() => {
-  watchEffect(() => {
-    if (!isReady.value) return;
+watchEffect(() => {
+  if (!isMounted.value) return;
+  if (!isReady.value) return;
 
-    const v = navAndTab.value;
+  const v = navAndTab.value;
 
-    Promise.resolve().then(() => {
-      updateSize();
-    });
-
-    return v;
+  Promise.resolve().then(() => {
+    updateSize();
   });
+
+  return v;
 });
 </script>
 

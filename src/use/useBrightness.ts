@@ -1,4 +1,11 @@
-import { Ref, ref, onMounted, onUnmounted, watchEffect } from 'vue';
+import {
+  Ref,
+  ref,
+  onMounted,
+  onUnmounted,
+  watchEffect,
+  WatchStopHandle
+} from 'vue';
 import Taro from '@tarojs/taro';
 
 export const useBrightness = (
@@ -10,12 +17,13 @@ export const useBrightness = (
   const visible = args.visible ?? ref(false);
   const brightness = ref(0);
 
+  let stopWatch: WatchStopHandle | null = null;
   onMounted(() => {
     if (useMount) {
       visible.value = true;
     }
 
-    const stopWatch = watchEffect(async () => {
+    stopWatch = watchEffect(async () => {
       // show
       if (visible.value) {
         const res = await Taro.getScreenBrightness();
@@ -28,13 +36,10 @@ export const useBrightness = (
         Taro.setScreenBrightness({ value: brightness.value });
       }
     });
-
-    onUnmounted(() => {
-      stopWatch();
-    });
   });
 
   onUnmounted(() => {
+    stopWatch?.();
     if (useMount) {
       visible.value = false;
     }

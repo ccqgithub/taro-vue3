@@ -1,4 +1,4 @@
-import { Ref, ref, onMounted, watch } from 'vue';
+import { Ref, ref, onMounted, onUnmounted, watch, WatchStopHandle } from 'vue';
 import Taro from '@tarojs/taro';
 // import { safeNextTick } from '@/utils';
 
@@ -39,8 +39,9 @@ export const useTransition = (args: {
     }
   };
 
+  let stopWatch: WatchStopHandle | null = null;
   onMounted(() => {
-    watch(
+    stopWatch = watch(
       () => {
         return args.visible.value;
       },
@@ -79,6 +80,10 @@ export const useTransition = (args: {
         immediate: true
       }
     );
+  });
+
+  onUnmounted(() => {
+    stopWatch?.();
   });
 
   return {
