@@ -104,9 +104,10 @@ onUnmounted(() => {
     :style="{
       zIndex
     }"
+    :show="transitionVisible"
   >
     <NView
-      v-if="props.mask && transitionVisible"
+      v-if="props.mask"
       :class="{
         [S.mask]: true,
         [transitionClasses]: true
@@ -121,7 +122,6 @@ onUnmounted(() => {
 
     <!-- popup -->
     <NView
-      v-if="transitionVisible"
       :class="{
         [S.modal]: true,
         [transitionClasses]: true,

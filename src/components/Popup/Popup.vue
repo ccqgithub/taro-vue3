@@ -108,10 +108,11 @@ const doOk = () => {
     :style="{
       zIndex
     }"
+    :show="transitionVisible"
   >
     <!-- mask -->
     <NView
-      v-if="props.mask && transitionVisible"
+      v-if="props.mask"
       :class="{
         [S.mask]: true,
         [transitionClasses]: true
@@ -126,7 +127,6 @@ const doOk = () => {
 
     <!-- popup -->
     <NView
-      v-if="transitionVisible"
       :class="{
         [S.popup]: true,
         [transitionClasses]: true,

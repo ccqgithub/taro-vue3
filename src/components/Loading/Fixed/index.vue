@@ -13,8 +13,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <Portal>
-    <NView v-show="props.show" :class="S.loading">
+  <Portal :show="props.show">
+    <NView :class="S.loading">
       <NView :class="S.iconBox">
         <NImage :src="imgLoading" :class="S.icon" mode="aspectFill" />
       </NView>

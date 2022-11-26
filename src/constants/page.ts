@@ -17,6 +17,7 @@ export type PageContextValue = {
   };
   showPopup: () => void;
   hidePopup: () => void;
+  getPortalKey: () => string;
   setPortal: (key: string, nodes: VNode[]) => void;
   removePortal: (key: string) => void;
 };

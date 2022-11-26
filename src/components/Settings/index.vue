@@ -95,7 +95,8 @@ useReady(() => {
     >
       <NImage :class="S.btnImg" :src="imgLogo" mode="aspectFit" />
     </NView>
-    <Portal v-if="show" :style="{ zIndex }">
+
+    <Portal :show="show" :style="{ zIndex }">
       <NView
         :class="S.box"
         :style="{ paddingTop: `${layout.topBarHeight + 20}px` }"

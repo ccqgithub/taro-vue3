@@ -18,6 +18,7 @@ export type UsePageReturn<T extends Record<string, any>> = {
   teleportEl: Ref<TaroElement | null>;
   showPopup: () => void;
   hidePopup: () => void;
+  getPortalKey: () => string;
   setPortal: (Key: string, nodes: VNode[]) => void;
   removePortal: (Key: string) => void;
 };
@@ -42,6 +43,7 @@ export const usePage = <
     }),
     showPopup: () => {},
     hidePopup: () => {},
+    getPortalKey: () => '',
     setPortal: () => {},
     removePortal: () => {}
   })!;
@@ -50,6 +52,7 @@ export const usePage = <
     ...toRefs(page.state),
     showPopup: page.showPopup,
     hidePopup: page.hidePopup,
+    getPortalKey: page.getPortalKey,
     setPortal: page.setPortal,
     removePortal: page.removePortal
   } as UsePageReturn<T>;

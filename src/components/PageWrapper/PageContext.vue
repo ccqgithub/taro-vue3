@@ -16,7 +16,6 @@ import Taro, {
 } from '@tarojs/taro';
 import { useStore } from 'pinia-di';
 
-import { Portal } from '@/components/Portal';
 import { ToastRender } from '@/components/Toast';
 import { LoadingAbsolute } from '@/components/Loading';
 import { NView, NPageMeta } from '@/components/Native';
@@ -152,6 +151,20 @@ useUnload(() => {
 
 // portals
 const portals = reactive(new Map() as Map<string, VNode[]>);
+const portalsKeys: string[] = [];
+for (let i = 0; i < 20; i++) {
+  portalsKeys.push(`portal-${i}`);
+}
+
+const getPortalKey = () => {
+  for (const key of portalsKeys) {
+    if (!portals.get(key)) return key;
+  }
+  console.warn(
+    `最多同时渲染 ${portalsKeys.length} 个 Portal，为了避免问题，请使用 Portal 的 'show' 属性控制渲染 Portal！如：<Portal :show="popupShow"></Portal>`
+  );
+  return '';
+};
 const setPortal = (key: string, nodes: VNode[]) => {
   portals.set(key, nodes);
 };
@@ -185,6 +198,7 @@ provide(PageInjectionKey, {
   state,
   showPopup,
   hidePopup,
+  getPortalKey,
   setPortal,
   removePortal
 });
@@ -237,17 +251,21 @@ provide(PageInjectionKey, {
           </NView>
 
           <!-- 全局自定义toast组件 -->
-          <Portal>
-            <NView :style="{ height: '0px', width: '0px' }">
-              <ToastRender />
-            </NView>
-          </Portal>
+          <NView :style="{ height: '0px', width: '0px' }">
+            <ToastRender />
+          </NView>
 
           <!-- portals -->
-          <NView>
-            <template v-for="[key, item] in portals" :key="key">
-              <RenderSlots :nodes="item"></RenderSlots>
-            </template>
+          <NView :style="{ height: '0px', width: '0px' }">
+            <NView
+              v-for="key in portalsKeys"
+              :key="key"
+              :style="{ height: '0px', width: '0px' }"
+            >
+              <NView v-if="portals.get(key)">
+                <RenderSlots :nodes="portals.get(key)"></RenderSlots>
+              </NView>
+            </NView>
           </NView>
         </NView>
       </template>
